@@ -31,6 +31,10 @@ hls.on(Hls.Events.FRAG_CHANGED, function (event, data) {
 	}
 });
 
+document.getElementById('skip-to-live').addEventListener('click', () => {
+	video.currentTime = video.duration - 0.5
+})
+
 document.body.addEventListener('click', (event) => {
 	const target = event.target?.closest('button');
 	if (target == null) {
