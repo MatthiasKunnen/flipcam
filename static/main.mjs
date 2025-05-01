@@ -1,4 +1,5 @@
 import Hls from 'hls'
+import {Time, timeToHuman} from 'helpers'
 
 const video = document.getElementById('video')
 const hls = new Hls()
@@ -19,18 +20,29 @@ hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
 hls.attachMedia(video)
 
 let ctsLatencyInput = document.getElementById('cts-latency')
-let cameraToServerLatency = Number(ctsLatencyInput.value)
+/**
+ * Camera-to-server latency.
+ */
+let ctsLatencyMs = Number(ctsLatencyInput.value)
 ctsLatencyInput.addEventListener('change', e => {
-	cameraToServerLatency = Number(ctsLatencyInput.value)
+	ctsLatencyMs = Number(ctsLatencyInput.value)
 })
 
+/**
+ * Latency from the browser -> media server -> camera.
+ */
 let latencyFromAirMs = 0
 let latencyDisplayElement = document.getElementById('latency')
 
 hls.on(Hls.Events.FRAG_CHANGED, function (event, data) {
 	if (data.frag.programDateTime !== undefined) {
-		latencyFromAirMs = (Date.now() - data.frag.programDateTime + cameraToServerLatency)
-		latencyDisplayElement.innerText = `${(latencyFromAirMs / 1000).toFixed(1)} s`
+		latencyFromAirMs = (Date.now() - data.frag.programDateTime + ctsLatencyMs)
+		latencyDisplayElement.innerText = '-' + timeToHuman(
+			latencyFromAirMs,
+			Time.Millis,
+			Time.Seconds,
+			1,
+		)
 	}
 });
 

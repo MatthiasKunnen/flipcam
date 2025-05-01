@@ -29,7 +29,7 @@ func html() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Flipcam</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script type=\"importmap\">\n\t\t\t{\n\t\t\t\t\"imports\": {\n\t\t\t\t\t\"hls\": \"/static/hls.light.mjs\"\n\t\t\t\t}\n\t\t\t}\n\t\t</script><link rel=\"modulepreload\" href=\"/static/hls.light.mjs\"><link rel=\"stylesheet\" href=\"/static/normalize.css\"><link rel=\"stylesheet\" href=\"/static/style.css\"></head><body><main><video controls id=\"video\" muted></video><div id=\"controls\"><div id=\"controls-left\"></div><div id=\"controls-main\"><button onclick=\"video.currentTime -= 5\">-5s</button> <button onclick=\"video.currentTime -= 1\">-1s</button> <button onclick=\"video.currentTime += 1\">+1s</button> <button onclick=\"video.currentTime += 5\">+5s</button> <button id=\"back-to-delay\">Back to delay</button></div><div id=\"controls-right\"><span id=\"latency\">?\u00a0s</span></div></div></main><aside><h2>Settings</h2><button id=\"skip-to-live\">Skip to live</button><div><label for=\"cts-latency\">Camera to server latency</label> <input id=\"cts-latency\" type=\"number\" step=\"100\" value=\"1000\"> ms</div></aside><script type=\"module\" src=\"/static/main.mjs\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Flipcam</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><script type=\"importmap\">\n\t\t\t{\n\t\t\t\t\"imports\": {\n\t\t\t\t\t\"helpers\": \"/static/helpers.mjs\",\n\t\t\t\t\t\"hls\": \"/static/hls.light.mjs\"\n\t\t\t\t}\n\t\t\t}\n\t\t</script><link rel=\"modulepreload\" href=\"/static/helpers.mjs\"><link rel=\"modulepreload\" href=\"/static/hls.light.mjs\"><link rel=\"stylesheet\" href=\"/static/normalize.css\"><link rel=\"stylesheet\" href=\"/static/style.css\"></head><body><main><video controls id=\"video\" muted></video><div id=\"controls\"><div id=\"controls-left\"></div><div id=\"controls-main\"><button onclick=\"video.currentTime -= 5\">-5s</button> <button onclick=\"video.currentTime -= 1\">-1s</button> <button onclick=\"video.currentTime += 1\">+1s</button> <button onclick=\"video.currentTime += 5\">+5s</button> <button id=\"back-to-delay\">Back to delay</button></div><div id=\"controls-right\"><span id=\"latency\">?\u00a0s</span></div></div></main><aside><h2>Settings</h2><button id=\"skip-to-live\">Skip to live</button><div><label for=\"cts-latency\">Camera to server latency</label> <input id=\"cts-latency\" type=\"number\" step=\"100\" value=\"1000\"> ms</div></aside><script type=\"module\" src=\"/static/main.mjs\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,7 +65,7 @@ func button(name string, content string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `main.templ`, Line: 53, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `main.templ`, Line: 55, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -78,7 +78,7 @@ func button(name string, content string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `main.templ`, Line: 53, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `main.templ`, Line: 55, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

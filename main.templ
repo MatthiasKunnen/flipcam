@@ -10,10 +10,12 @@ templ html() {
 		<script type="importmap">
 			{
 				"imports": {
+					"helpers": "/static/helpers.mjs",
 					"hls": "/static/hls.light.mjs"
 				}
 			}
 		</script>
+		<link rel="modulepreload" href="/static/helpers.mjs"/>
 		<link rel="modulepreload" href="/static/hls.light.mjs"/>
 		<link rel="stylesheet" href="/static/normalize.css">
 		<link rel="stylesheet" href="/static/style.css">
