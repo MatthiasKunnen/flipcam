@@ -87,7 +87,6 @@ h2 {
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
-	flex-grow: 1;
 }
 
 aside {
