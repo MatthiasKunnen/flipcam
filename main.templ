@@ -30,16 +30,24 @@ templ html() {
 				<button onclick="video.currentTime -= 1">-1s</button>
 				<button onclick="video.currentTime += 1">+1s</button>
 				<button onclick="video.currentTime += 5">+5s</button>
-				<button id="back-to-delay">Back to delay</button>
 			</div>
 			<div id="controls-right">
 				<span id="latency">? s</span>
 			</div>
 		</div>
+		<div id="goto">
+			GoTo
+			<button id="skip-to-live">Live</button>
+			<button aria-label="Add" id="save-latency">+</button>
+			<div id="saved-latencies">
+			</div>
+			<button class="button-icon" aria-label="Remove mode" id="remove-latency">
+				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+			</button>
+		</div>
 	</main>
 	<aside>
 		<h2>Settings</h2>
-		<button id="skip-to-live">Skip to live</button>
 		<div>
 			<label for="cts-latency">Camera to server latency</label>
 			<input id="cts-latency" type="number" step="100" value="1000">

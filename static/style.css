@@ -1,6 +1,8 @@
 body {
 	font-size: 2em;
+	--button-background-color: #ffffff;
 	--button-click-color: #e0e0e0;
+	--button-hover-color: #f4f4f4;
 	padding: 8px;
 }
 video {
@@ -13,12 +15,26 @@ button {
 	border-radius: 4px;
 	padding: 0.25em 0.5em;
 	touch-action: manipulation;
+	background-color: var(--button-background-color);
 
 	@media (hover: hover) {
 		&:focus, &:hover {
-			background-color: #f4f4f4;
+			background-color: var(--button-hover-color);
 		}
 	}
+}
+
+.button-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	height: 2.125em;
+	width: 2.125em;
+}
+.button-icon > svg {
+	width: 1.5em;
+	height: auto;
 }
 
 #controls {
@@ -40,6 +56,32 @@ button {
 
 h2 {
 	font-size: 1.5em;
+}
+
+.flex-grow {
+	flex-grow: 1;
+}
+
+#goto {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5em;
+}
+
+#goto.mode-remove #remove-latency,
+#goto.mode-remove #saved-latencies > button {
+	--button-background-color: #e71f1f;
+	--button-hover-color: #ec3a3a;
+	--button-click-color: #ec6060;
+}
+
+#saved-latencies {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5em;
+	flex-grow: 1;
 }
 
 #cts-latency {

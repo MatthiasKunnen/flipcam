@@ -50,6 +50,42 @@ document.getElementById('skip-to-live').addEventListener('click', () => {
 	video.currentTime = video.duration - 0.5
 })
 
+const savedLatencies = document.getElementById('saved-latencies')
+const gotoElement = document.getElementById('goto')
+let latencyModeAdd = true
+function setSaveLatencyMode(isModeAdd) {
+	if (isModeAdd) {
+		latencyModeAdd = true
+		gotoElement.classList.remove('mode-remove')
+	} else {
+		latencyModeAdd = false
+		gotoElement.classList.add('mode-remove')
+	}
+}
+
+document.getElementById('save-latency').addEventListener('click', () => {
+	setSaveLatencyMode(true)
+	const newButton = document.createElement('button')
+	const desiredLatencyS = Math.floor(latencyFromAirMs / 1000)
+	newButton.innerText = timeToHuman(
+		desiredLatencyS,
+		Time.Seconds,
+		Time.Seconds,
+		0,
+	)
+	newButton.addEventListener('click', () => {
+		if (!latencyModeAdd) {
+			newButton.remove()
+			return;
+		}
+		video.currentTime = video.duration - desiredLatencyS + ctsLatencyMs / 1000 + 0.5;
+	})
+	savedLatencies.append(newButton)
+})
+document.getElementById('remove-latency').addEventListener('click', () => {
+	setSaveLatencyMode(!latencyModeAdd)
+})
+
 document.body.addEventListener('click', (event) => {
 	const target = event.target?.closest('button');
 	if (target == null) {
@@ -68,18 +104,3 @@ document.body.addEventListener('click', (event) => {
 	);
 });
 
-const targetLatency = 20;
-
-document.getElementById('back-to-delay').addEventListener('click', () => {
-	const targetTime = hls.liveSyncPosition - targetLatency;
-
-	// Ensure the target time is not negative
-	if (targetTime >= 0) {
-		// Set the video's current time to the target time
-		video.currentTime = targetTime;
-		console.log('Button clicked: Seeking video to', targetTime, 'seconds behind live.');
-	} else {
-		console.warn('Button clicked: Calculated target time is negative. Seeking to the beginning instead.');
-		video.currentTime = 0; // Or handle as appropriate
-	}
-})
