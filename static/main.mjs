@@ -15,7 +15,12 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
 hls.attachMedia(video)
 
-let cameraToServerLatency = 1000
+let ctsLatencyInput = document.getElementById('cts-latency')
+let cameraToServerLatency = Number(ctsLatencyInput.value)
+ctsLatencyInput.addEventListener('change', e => {
+	cameraToServerLatency = Number(ctsLatencyInput.value)
+})
+
 let latencyFromAirMs = 0
 let latencyDisplayElement = document.getElementById('latency')
 
