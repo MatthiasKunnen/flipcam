@@ -21,14 +21,19 @@ templ html() {
 	<body>
 	<main>
 		<video controls id="video" muted></video>
-		<div id="main-controls">
-			<button onclick="video.currentTime -= 5">-5s</button>
-			<button onclick="video.currentTime -= 1">-1s</button>
-			<button onclick="video.currentTime += 1">+1s</button>
-			<button onclick="video.currentTime += 5">+5s</button>
-			<button id="back-to-delay">Back to delay</button>
+		<div id="controls">
+			<div id="controls-left"></div>
+			<div id="controls-main">
+				<button onclick="video.currentTime -= 5">-5s</button>
+				<button onclick="video.currentTime -= 1">-1s</button>
+				<button onclick="video.currentTime += 1">+1s</button>
+				<button onclick="video.currentTime += 5">+5s</button>
+				<button id="back-to-delay">Back to delay</button>
+			</div>
+			<div id="controls-right">
+				<span id="latency">? s</span>
+			</div>
 		</div>
-		<span id="latency"></span>
 	</main>
 	<aside>
 		<h2>Settings</h2>

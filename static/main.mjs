@@ -15,9 +15,14 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
 hls.attachMedia(video)
 
+let cameraToServerLatency = 1000
+let latencyFromAirMs = 0
+let latencyDisplayElement = document.getElementById('latency')
+
 hls.on(Hls.Events.FRAG_CHANGED, function (event, data) {
 	if (data.frag.programDateTime !== undefined) {
-		console.log('Current Program Date Time:', new Date(data.frag.programDateTime).toISOString());
+		latencyFromAirMs = (Date.now() - data.frag.programDateTime + cameraToServerLatency)
+		latencyDisplayElement.innerText = `${(latencyFromAirMs / 1000).toFixed(1)} s`
 	}
 });
 
