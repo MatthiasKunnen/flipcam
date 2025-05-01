@@ -3,10 +3,14 @@ body {
 	--button-background-color: #ffffff;
 	--button-click-color: #e0e0e0;
 	--button-hover-color: #f4f4f4;
-	padding: 8px;
 }
+
+main {
+	display: flex;
+	flex-direction: column;
+}
+
 video {
-	height: calc(100vh - 3em);
 	width: 100vw;
 }
 
@@ -67,6 +71,7 @@ h2 {
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
+	padding: 0.5em;
 }
 
 #goto.mode-remove #remove-latency,
@@ -82,6 +87,10 @@ h2 {
 	flex-wrap: wrap;
 	gap: 0.5em;
 	flex-grow: 1;
+}
+
+aside {
+	padding: 0.5em;
 }
 
 #cts-latency {
