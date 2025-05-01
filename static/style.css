@@ -35,6 +35,7 @@ button {
 	padding: 0;
 	height: 2.125em;
 	width: 2.125em;
+	border: 0;
 }
 .button-icon > svg {
 	width: 1.5em;
