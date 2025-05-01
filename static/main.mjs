@@ -2,7 +2,10 @@ import Hls from 'hls'
 
 const video = document.getElementById('video')
 const hls = new Hls()
-window.hls = hls;
+window.flipcam = {
+	hls,
+	video,
+};
 
 // MEDIA_ATTACHED event is fired by hls object once MediaSource is ready
 hls.on(Hls.Events.MEDIA_ATTACHED, function () {
