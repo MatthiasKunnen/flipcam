@@ -82,11 +82,22 @@ h2 {
 	--button-click-color: #ec6060;
 }
 
+#saved-latencies-container {
+	display: flex;
+	flex-direction: row-reverse;
+	gap: 0.5em;
+}
+
 #saved-latencies {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 0.5em;
+}
+
+#saved-latencies:empty,
+#remove-latency:has(~ #saved-latencies:empty) {
+	display: none;
 }
 
 aside {
