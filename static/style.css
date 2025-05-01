@@ -1,0 +1,31 @@
+body {
+	font-size: 2em;
+	--button-click-color: #e0e0e0;
+}
+video {
+	height: calc(100vh - 3em);
+	width: 100vw;
+}
+
+button {
+	border: 0.0625em solid black;
+	border-radius: 4px;
+	padding: 0.25em 0.5em;
+	touch-action: manipulation;
+
+	@media (hover: hover) {
+		&:focus, &:hover {
+			background-color: #f4f4f4;
+		}
+	}
+}
+
+#main-controls {
+	display: flex;
+	justify-content: center;
+	gap: 0.5em;
+}
+
+h2 {
+	font-size: 1.5em;
+}
