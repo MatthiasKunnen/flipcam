@@ -14,10 +14,14 @@ hls.on(Hls.Events.MEDIA_ATTACHED, function () {
 })
 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 	console.log(`manifest loaded, found ${data.levels.length} quality level`)
-	video.play()
 })
-hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
-hls.attachMedia(video)
+
+const onFirstPlay =() => {
+	hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
+	hls.attachMedia(video)
+	video.removeEventListener('play', onFirstPlay)
+}
+video.addEventListener('play', onFirstPlay)
 
 let ctsLatencyInput = document.getElementById('cts-latency')
 /**
