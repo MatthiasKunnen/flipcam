@@ -86,6 +86,56 @@ document.getElementById('remove-latency').addEventListener('click', () => {
 	setSaveLatencyMode(!latencyModeAdd)
 })
 
+const playbackSpeedInput = document.getElementById('playback-speed-input')
+const playbackSpeedOutput = document.getElementById('playback-speed-output')
+playbackSpeedInput.addEventListener('input', (event) => {
+	updatePlaybackRate(Number(event.target.value))
+})
+document.getElementById('playback-speed-reset').addEventListener('click', () => {
+	resetPlaybackRate()
+})
+resetPlaybackRate()
+
+/**
+ * Sets the playback speed. Larger numbers mean faster. Negative numbers cause slow motion.
+ * Zero is no speedup or slowdown.
+ * @param {number} input
+ */
+function updatePlaybackRate(input) {
+	if (!Number.isFinite(input)) {
+		return;
+	}
+
+	let rate = 1
+	if (input > 0) {
+		rate = input + 1
+	} else if (input < 0) {
+		rate = input * 0.2 + 1
+		rate = Math.max(rate, 0.01)
+	}
+
+	playbackSpeedOutput.innerText = '×' + rate.toFixed(2);
+	video.playbackRate = rate;
+}
+
+function resetPlaybackRate() {
+	playbackSpeedInput.value = '0'
+	updatePlaybackRate(0)
+}
+
+/**
+ * Value in seconds that determines that when within this amount of seconds from the
+ * camera-to-server latency, the playback speed will be reset.
+ */
+const resetPlaybackCaughtUpMargin = 2
+setInterval(() => {
+	if (video.playbackRate > 1
+		&& video.duration - video.currentTime < (ctsLatencyMs / 1000) + resetPlaybackCaughtUpMargin) {
+		// We caught up to live
+		resetPlaybackRate()
+	}
+}, 1000)
+
 document.body.addEventListener('click', (event) => {
 	const target = event.target?.closest('button');
 	if (target == null) {
