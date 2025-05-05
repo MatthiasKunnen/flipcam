@@ -1,0 +1,13 @@
+/**
+!/static/
+!/static/*.mjs
+!/static/*.css
+!/.editorconfig
+!/.gitignore
+!/go.mod
+!/go.sum
+!/LICENSE
+!/README.md
+!/main.go
+!/main.templ
+!/main_templ.go
