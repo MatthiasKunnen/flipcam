@@ -8,6 +8,8 @@
 !/go.sum
 !/LICENSE
 !/README.md
+!/caddy.conf.js
 !/main.go
 !/main.templ
 !/main_templ.go
+!/mediamtx.yaml

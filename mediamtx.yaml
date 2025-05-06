@@ -1,0 +1,42 @@
+# Runs the RTMP -> HLS muxer.
+# Usage: mediamtx mediamtx.yaml
+
+hls: yes
+# Address of the HLS listener.
+hlsAddress: :8888
+hlsAllowOrigin: '*'
+hlsAlwaysRemux: yes
+hlsVariant: fmp4
+hlsDirectory: /mnt/perm_sdcard/hls_out
+# Number of HLS segments to keep on the server.
+# Segments allow seeking through the stream.
+# Their number doesn't influence latency.
+hlsSegmentCount: 100000
+# Minimum duration of each segment.
+# A player usually puts 3 segments in a buffer before reproducing the stream.
+# The final segment duration is also influenced by the interval between IDR frames,
+# since the server changes the duration in order to include at least one IDR frame
+# in each segment.
+hlsSegmentDuration: 1s
+
+hlsEncryption: yes
+# Path to the server key. This is needed only when encryption is yes.
+# This can be generated with:
+# openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -out server.key
+# openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
+hlsServerKey: server.key
+# Path to the server certificate.
+hlsServerCert: server.crt
+
+srt: no
+
+rtmp: yes
+rtmpAddress: :1935
+
+rtsp: no
+
+webrtc: no
+
+paths:
+  camera:
+
