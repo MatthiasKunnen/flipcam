@@ -13,3 +13,4 @@
 !/main.templ
 !/main_templ.go
 !/mediamtx.yaml
+!/rtmp_to_hls.sh

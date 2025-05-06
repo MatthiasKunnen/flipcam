@@ -21,7 +21,7 @@ const goproRoutes = [
 ];
 
 const flipcamRoutes = [
-	{ // Camera path is HLS, powered by mediamtx.yaml
+	{ // Camera path is HLS, powered by ffmpeg, which writes the files to disk.
 		match: [
 			{
 				path: [
@@ -31,21 +31,13 @@ const flipcamRoutes = [
 		],
 		handle: [
 			{
-				handler: 'reverse_proxy',
-				upstreams: [
-					{
-						dial: 'localhost:8888',
-					},
-				],
-				transport: {
-					protocol: 'http',
-					versions: [
-						'h2',
-					],
-					tls: {
-						insecure_skip_verify: true,
-					},
-				},
+				handler: 'rewrite',
+				strip_path_prefix: '/camera',
+			},
+			{
+				handler: 'file_server',
+				index_names: [],
+				root: '/mnt/perm_sdcard/hls_out',
 			},
 		],
 		terminal: true,

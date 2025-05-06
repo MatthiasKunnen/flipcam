@@ -17,7 +17,7 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 })
 
 const onFirstPlay =() => {
-	hls.loadSource('http://192.168.23.1:8888/camera/index.m3u8')
+	hls.loadSource('https://flipcam.sd4u.be/camera/index.m3u8')
 	hls.attachMedia(video)
 	video.removeEventListener('play', onFirstPlay)
 }
