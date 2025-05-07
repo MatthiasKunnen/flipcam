@@ -31,6 +31,16 @@ const flipcamRoutes = [
 		],
 		handle: [
 			{
+				handler: 'headers',
+				response: {
+					add: {
+						'access-control-allow-origin': [
+							'http://localhost:3000',
+						],
+					},
+				},
+			},
+			{
 				handler: 'rewrite',
 				strip_path_prefix: '/camera',
 			},
