@@ -16,12 +16,13 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 	console.log(`manifest loaded, found ${data.levels.length} quality level`)
 })
 
-const onFirstPlay =() => {
+const playButton = document.getElementById('playback-start')
+playButton.addEventListener('click', () => {
+	playButton.style.display = 'none'
 	hls.loadSource('https://flipcam.sd4u.be/camera/index.m3u8')
 	hls.attachMedia(video)
-	video.removeEventListener('play', onFirstPlay)
-}
-video.addEventListener('play', onFirstPlay)
+	video.play()
+})
 
 let ctsLatencyInput = document.getElementById('cts-latency')
 /**
