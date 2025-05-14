@@ -22,12 +22,17 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 	console.log(`manifest loaded, found ${data.levels.length} quality level`)
 })
 
+const playListUrl = document.getElementById('playlist-url')
 const playButton = document.getElementById('playback-start')
 playButton.addEventListener('click', () => {
 	playButton.style.display = 'none'
-	hls.loadSource('https://flipcam.sd4u.be/camera/index.m3u8')
+	hls.loadSource(playListUrl.value)
 	hls.attachMedia(video)
 	video.play()
+})
+playListUrl.addEventListener('change', () => {
+	console.log('change', playListUrl.value)
+	hls.loadSource(playListUrl.value)
 })
 
 let ctsLatencyInput = document.getElementById('cts-latency')

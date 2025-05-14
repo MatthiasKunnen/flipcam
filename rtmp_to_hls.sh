@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Basic RTMP to HLS using ffmpeg. The flipcam executable uses a similar command to perform muxing.
 # Alternative to mediamtx, more performant, simpler.
 # Requires a web server to serve the HLS files. This approach prevents the response times
 # sky rocketing as stream time increases with mediamtx.
