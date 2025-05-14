@@ -52,6 +52,24 @@ const flipcamRoutes = [
 		],
 		handle: [
 			{
+				handler: 'encode',
+				encodings: {
+					gzip: {
+						level: 4,
+					},
+					zstd: {
+						level: 'fastest',
+					},
+				},
+				prefer: ['zstd', 'gzip'],
+				match: {
+					headers: {
+						'content-type': ['audio/x-mpegurl'],
+					},
+				},
+				minimum_length: 1_000,
+			},
+			{
 				handler: 'headers',
 				response: {
 					add: {
