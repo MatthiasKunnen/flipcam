@@ -4,11 +4,11 @@
 !/static/*.css
 !/.editorconfig
 !/.gitignore
-!/go.mod
-!/go.sum
 !/LICENSE
 !/README.md
 !/caddy.conf.js
+!/go.mod
+!/go.sum
 !/main.go
 !/main.templ
 !/main_templ.go
