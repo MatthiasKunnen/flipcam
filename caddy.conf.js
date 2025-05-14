@@ -21,6 +21,27 @@ const goproRoutes = [
 ];
 
 const flipcamRoutes = [
+	{
+		match: [
+			{
+				path: [
+					'/camera/*.m3u8',
+				],
+			},
+		],
+		handle: [
+			{
+				handler: 'headers',
+				response: {
+					add: {
+						'cache-control': [
+							'no-store',
+						],
+					},
+				},
+			},
+		],
+	},
 	{ // Camera path is HLS, powered by ffmpeg, which writes the files to disk.
 		match: [
 			{
