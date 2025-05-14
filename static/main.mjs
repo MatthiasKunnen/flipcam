@@ -1,6 +1,7 @@
 import Hls from 'hls'
 import {Time, timeToHuman} from 'helpers'
 
+const videoContainer = document.getElementById('video-container')
 const video = document.getElementById('video')
 const hls = new Hls()
 window.flipcam = {
@@ -141,6 +142,16 @@ setInterval(() => {
 	}
 }, 1000)
 
+document.getElementById('fullscreen-toggle').addEventListener('click', () => {
+	if (document.fullscreenElement == null) {
+		document.documentElement.requestFullscreen({
+			navigationUI: 'hide',
+		})
+	} else {
+		document.exitFullscreen();
+	}
+})
+
 document.body.addEventListener('click', (event) => {
 	const target = event.target?.closest('button');
 	if (target == null) {
@@ -159,3 +170,86 @@ document.body.addEventListener('click', (event) => {
 	);
 });
 
+// Expandable and collapsible controls
+const controls = document.getElementById('controls')
+const main = document.getElementsByTagName('main')[0]
+const mainControls = document.getElementById('main-controls')
+let canBeFullyVisible = null
+let performUpdateWhenNextCollapsed = false
+function updateControls() {
+	if (performUpdateWhenNextCollapsed) {
+		return
+	}
+	if (videoContainer.contains(mainControls)) {
+		performUpdateWhenNextCollapsed = true
+		return
+	}
+
+	const canBeFullyVisibleNew = isElementInInitialViewport(controls)
+	if (canBeFullyVisible === canBeFullyVisibleNew) {
+		return
+	}
+	canBeFullyVisible = canBeFullyVisibleNew
+
+	if (canBeFullyVisible) {
+		mainControls.classList.add('no-expand')
+	} else {
+		mainControls.classList.remove('no-expand')
+	}
+}
+
+function expandControls() {
+	if (videoContainer.contains(controls)) {
+		// Do nothing, fully expanded
+	} else if (videoContainer.contains(mainControls)) {
+		// Go to full expansion
+		videoContainer.appendChild(controls)
+		controls.prepend(mainControls)
+		mainControls.classList.add('fully-expanded')
+	} else {
+		videoContainer.appendChild(mainControls)
+		mainControls.classList.remove('fully-collapsed')
+	}
+}
+function collapseControls() {
+	if (videoContainer.contains(controls)) {
+		mainControls.classList.remove('fully-expanded')
+		main.appendChild(controls)
+		videoContainer.appendChild(mainControls)
+	} else if (videoContainer.contains(mainControls)) {
+		controls.prepend(mainControls)
+		mainControls.classList.add('fully-collapsed')
+
+		if (performUpdateWhenNextCollapsed) {
+			updateControls()
+		}
+	}
+}
+
+document.getElementById('expand-now').addEventListener('click', () => {
+	expandControls()
+})
+document.getElementById('collapse-now').addEventListener('click', () => {
+	collapseControls()
+})
+window.expand = expandControls
+window.collapse = collapseControls
+
+/**
+ * @param {HTMLElement} elem
+ * @returns boolean
+ */
+function isElementInInitialViewport(elem) {
+	const rect = elem.getBoundingClientRect();
+	const scrollTop = window.scrollY;
+	const elemTop = rect.top + scrollTop;
+	const elemBottom = elemTop + rect.height;
+	const viewportHeight = window.innerHeight;
+	console.log(elemBottom, viewportHeight)
+	return elemTop >= 0 && elemBottom <= viewportHeight;
+}
+
+updateControls()
+window.addEventListener('resize', () => {
+	updateControls()
+})
