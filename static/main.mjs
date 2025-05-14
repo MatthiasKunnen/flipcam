@@ -3,7 +3,12 @@ import {Time, timeToHuman} from 'helpers'
 
 const videoContainer = document.getElementById('video-container')
 const video = document.getElementById('video')
-const hls = new Hls()
+const hls = new Hls({
+	// Seconds that frames will be kept in memory. Keeping too many frames is suspected to cause
+	// out-of-memory killing on Firefox. The segments are never far away so we don't need to keep
+	// many.
+	backBufferLength: 3 * 60,
+})
 window.flipcam = {
 	hls,
 	video,
