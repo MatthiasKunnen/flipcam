@@ -1,7 +1,8 @@
-/**
-!/static/
-!/static/*.mjs
+/*
+!/internal/
+!/pkg/
 !/static/*.css
+!/static/*.mjs
 !/.editorconfig
 !/.gitignore
 !/LICENSE
@@ -9,9 +10,5 @@
 !/caddy.conf.js
 !/go.mod
 !/go.sum
-!/main.go
-!/main.templ
-!/main_templ.go
 !/mediamtx.yaml
-!/rtmp_hls_muxer.go
 !/rtmp_to_hls.sh
