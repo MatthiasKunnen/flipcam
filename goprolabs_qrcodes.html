@@ -2303,34 +2303,40 @@
 
 	</script>
 	<style>
-		* {
+		*, ::after, ::before {
 			box-sizing: border-box;
 			--outline-width: 0.5mm;
 		}
 
-		body {
-			width: 145mm;
-			height: 195mm;
-			margin: 0 10mm;
+		@page {
+			size: A4;
+		}
 
+		body {
 			font-family: sans-serif;
+			margin: 0;
+
+			@media screen {
+				padding: 1cm;
+			}
 		}
 
 		.page {
-			height: 100%;
-			padding: 5mm;
+			width: 210mm;
+			height: 148mm;
+			padding: 2cm;
+			margin-left: auto;
+			margin-right: auto;
 
 			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-rows: max-content;
+			grid-template-columns: repeat(2, 1fr);
 			align-content: space-between;
 			gap: 10mm;
 
-			outline: var(--outline-width) solid black;
 			break-inside: avoid;
 
 			@media screen {
-				margin-bottom: 1cm;
+				outline: var(--outline-width) solid black;
 			}
 		}
 
@@ -2341,16 +2347,14 @@
 		}
 
 		.page > div > svg {
-			max-width: 40mm;
+			max-width: 30mm;
 		}
 
 		.page-break {
-			/* This height prevents clipping of the page's outline */
-			height: var(--outline-width);
+			break-after: page;
 
-			&:not(:first-of-type) {
-				/* .page-break is inserted at the beginning of the document too */
-				break-before: page;
+			@media screen {
+				margin-bottom: 1cm;
 			}
 		}
 
@@ -2358,10 +2362,12 @@
 		.label {
 			margin-top: .5em;
 			margin-bottom: .5em;
+			text-align: center;
 		}
 
 		.command-label {
 			font-size: .9em;
+			text-align: center;
 		}
 	</style>
 </head>
@@ -2397,7 +2403,7 @@
 	document.querySelectorAll('.page').forEach(pageElem => {
 		const pageBreak = document.createElement('div')
 		pageBreak.classList.add('page-break')
-		pageElem.insertAdjacentElement('beforebegin', pageBreak)
+		pageElem.insertAdjacentElement('afterend', pageBreak)
 	})
 </script>
 </body>
