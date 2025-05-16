@@ -2358,6 +2358,12 @@
 			}
 		}
 
+		@media print {
+
+			.explanation {
+				display: none;
+			}
+		}
 
 		.label {
 			margin-top: .5em;
@@ -2372,6 +2378,12 @@
 	</style>
 </head>
 <body>
+<h1 class="explanation">QR codes for controlling Labs enabled GoPro</h1>
+<p class="explanation">
+	Export as PDF using print without margins, margin is already included.
+	Each box is an A5 and the page is A4.
+	Print double-sided and then cut in the middle to get an A5.
+</p>
 <div class="page">
 	<div data-command="oW1mVr1080!W!GL">Stream pre H12, no copy</div>
 	<div data-command="oW1mVr1080!W!GLC">Stream pre H12, with copy</div>
