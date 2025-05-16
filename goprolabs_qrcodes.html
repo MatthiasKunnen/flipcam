@@ -2305,11 +2305,19 @@
 	<style>
 		* {
 			box-sizing: border-box;
+			--outline-width: 0.5mm;
 		}
 
 		body {
 			width: 145mm;
 			height: 195mm;
+			margin: 0 10mm;
+
+			font-family: sans-serif;
+		}
+
+		.page {
+			height: 100%;
 			padding: 5mm;
 
 			display: grid;
@@ -2318,19 +2326,34 @@
 			align-content: space-between;
 			gap: 10mm;
 
-			outline: 1px solid black;
-			font-family: sans-serif;
+			outline: var(--outline-width) solid black;
+			break-inside: avoid;
+
+			@media screen {
+				margin-bottom: 1cm;
+			}
 		}
 
-		body > div {
+		.page > div {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 		}
 
-		body > div > svg {
+		.page > div > svg {
 			max-width: 40mm;
 		}
+
+		.page-break {
+			/* This height prevents clipping of the page's outline */
+			height: var(--outline-width);
+
+			&:not(:first-of-type) {
+				/* .page-break is inserted at the beginning of the document too */
+				break-before: page;
+			}
+		}
+
 
 		.label {
 			margin-top: .5em;
@@ -2343,12 +2366,14 @@
 	</style>
 </head>
 <body>
-<div data-command="oW1mVr1080!W!GL">Stream pre H12, no copy</div>
-<div data-command="oW1mVr1080!W!GLC">Stream pre H12, with copy</div>
-<div data-command="!GL">Stream post H12, no copy</div>
-<div data-command="!GLC">Stream post H12, with copy</div>
+<div class="page">
+	<div data-command="oW1mVr1080!W!GL">Stream pre H12, no copy</div>
+	<div data-command="oW1mVr1080!W!GLC">Stream pre H12, with copy</div>
+	<div data-command="!GL">Stream post H12, no copy</div>
+	<div data-command="!GLC">Stream post H12, with copy</div>
+</div>
 <script type="module">
-	document.querySelectorAll('[data-command]').forEach(e => {
+	document.querySelectorAll('.page [data-command]').forEach(e => {
 		const command = e.dataset.command
 		const label = document.createElement('span')
 		label.innerText = e.innerText
@@ -2367,6 +2392,12 @@
 		e.insertAdjacentHTML('afterbegin', qr.createSvgTag({
 			margin: 0,
 		}))
+	})
+
+	document.querySelectorAll('.page').forEach(pageElem => {
+		const pageBreak = document.createElement('div')
+		pageBreak.classList.add('page-break')
+		pageElem.insertAdjacentElement('beforebegin', pageBreak)
 	})
 </script>
 </body>
