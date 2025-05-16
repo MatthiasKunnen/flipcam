@@ -10,5 +10,6 @@
 !/caddy.conf.js
 !/go.mod
 !/go.sum
+!/goprolabs_qrcodes.html
 !/mediamtx.yaml
 !/rtmp_to_hls.sh
