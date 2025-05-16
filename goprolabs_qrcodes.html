@@ -2390,6 +2390,13 @@
 	<div data-command="!GL">Stream post H12, no copy</div>
 	<div data-command="!GLC">Stream post H12, with copy</div>
 </div>
+<div class="page">
+	<div data-command="WIFI:S:flipcam;T:WPA;P:do a flip;H:false;;"
+		 data-command-label="ssid: flipcam, password: do a flip">
+		WiFi credentials for a viewing device
+	</div>
+	<div data-command="https://flipcam.sd4u.be">Control interface</div>
+</div>
 <script type="module">
 	document.querySelectorAll('.page [data-command]').forEach(e => {
 		const command = e.dataset.command
@@ -2400,7 +2407,7 @@
 		e.appendChild(label)
 
 		const commandLabel = document.createElement('span')
-		commandLabel.innerText = command
+		commandLabel.innerText = e.dataset.commandLabel ?? e.dataset.command
 		commandLabel.classList.add('command-label')
 		e.appendChild(commandLabel)
 
