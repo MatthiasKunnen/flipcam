@@ -33,6 +33,7 @@ func GetCommand() *cobra.Command {
 }
 
 func init() {
+	rootCmd.AddCommand(genConfCmd)
 	rootCmd.AddCommand(runCmd)
 	rootCmd.Flags().BoolVar(&versionRequested, "version", false, "Version info")
 }

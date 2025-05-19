@@ -14,9 +14,13 @@ import (
 	"time"
 )
 
+var origin = "https://flipcam.sd4u.be"
+var host = "flipcam.sd4u.be"
+
 type FlipCam struct {
 	HlsOutputDir      string
 	HlsUrlPathPrefix  string
+	UiPort            string
 	hlsPlayListPath   string
 	hlsPlayListPathMu sync.RWMutex
 	stop              chan struct{}
@@ -26,6 +30,9 @@ type FlipCam struct {
 func (f *FlipCam) Init() {
 	f.stop = make(chan struct{})
 	f.stopped = make(chan struct{})
+	if f.UiPort == "" {
+		f.UiPort = ":3000"
+	}
 }
 
 func (f *FlipCam) Start() error {
@@ -56,15 +63,15 @@ func (f *FlipCam) Start() error {
 				log.Fatalf("Failed to set playlist path: %v", err)
 			}
 
+			err = muxer.Start()
+			if err != nil {
+				log.Printf("[muxer]: failed to start: %v\n", err)
+			}
+
 			select {
 			case done := <-internalRestartChan:
 				close(done)
 			default:
-			}
-
-			err = muxer.Start()
-			if err != nil {
-				log.Printf("[muxer]: failed to start: %v\n", err)
 			}
 
 			runEnd := make(chan struct{})
@@ -107,12 +114,12 @@ func (f *FlipCam) Start() error {
 	}()
 
 	go func() {
-		srv := http.Server{Addr: ":3000"}
+		srv := http.Server{Addr: f.UiPort}
 		static := http.FileServer(http.Dir("./static"))
 		http.Handle("/static/", http.StripPrefix("/static/", static))
 
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			playlistUrlPath := "https://flipcam.sd4u.be" + f.getPlayListUrlPath()
+			playlistUrlPath := origin + f.getPlayListUrlPath()
 			err := Index(playlistUrlPath).Render(r.Context(), w)
 			if err != nil {
 				log.Printf("web: failed to render: %v\n", err)

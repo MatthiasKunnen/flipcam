@@ -13,6 +13,7 @@ import (
 
 var hlsOutputDir string
 var hlsUrlPathPrefix string
+var uiPort string
 
 var runCmd = &cobra.Command{
 	Use:     "run",
@@ -52,20 +53,7 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	runCmd.Flags().StringVar(
-		&hlsOutputDir,
-		"hls-output-dir",
-		"",
-		"Sets the directory where the HLS segments and playlists are stored.",
-	)
-	runCmd.Flags().StringVar(
-		&hlsUrlPathPrefix,
-		"hls-url-path-prefix",
-		"/camera",
-		"Sets the path prefix for the playlist URL.",
-	)
-	err := runCmd.MarkFlagRequired("hls-output-dir")
-	if err != nil {
-		log.Fatal(err)
-	}
+	addHlsOutputDirFlag(runCmd, &hlsOutputDir)
+	addHlsUrlPathPrefixFlag(runCmd, &hlsUrlPathPrefix)
+	addUiPortFlag(runCmd, &uiPort)
 }
