@@ -30,6 +30,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 
 	flipcamRoutes := []OrderedObject[interface{}]{
 		{
+			// Allow CORS from local origins
 			{
 				"match", []OrderedObject[interface{}]{
 					{
@@ -46,6 +47,42 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 								{
 									"add", map[string][]string{
 										"cache-control": {"no-store"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			// Allow cross-origin requests from UI port
+			{
+				"match", []OrderedObject[interface{}]{
+					{
+						{"path", []string{f.HlsUrlPathPrefix + "/*"}},
+						{
+							"header_regexp", OrderedObject[interface{}]{
+								{
+									"origin", OrderedObject[interface{}]{
+										{"name", "cors_local"},
+										{"pattern", "^https?:\\/\\/(localhost|127\\.0\\.0\\.1)(:\\d+)?$"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				"handle", []OrderedObject[interface{}]{
+					{
+						{"handler", "headers"},
+						{
+							"response", OrderedObject[interface{}]{
+								{
+									"set", map[string][]string{
+										"access-control-allow-origin": {"{http.request.header.Origin}"},
 									},
 								},
 							},
@@ -92,18 +129,6 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 							},
 						},
 						{"minimum_length", 1_000},
-					},
-					{
-						{"handler", "headers"},
-						{
-							"response", OrderedObject[interface{}]{
-								{
-									"add", map[string][]string{
-										"access-control-allow-origin": {"http://localhost" + f.UiPort},
-									},
-								},
-							},
-						},
 					},
 					{
 						{"handler", "rewrite"},
