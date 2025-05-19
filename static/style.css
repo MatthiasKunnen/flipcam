@@ -188,6 +188,10 @@ aside {
 	width: 10ch;
 }
 
+#restart-muxer {
+	margin: 1em 1em 1em 0;
+}
+
 @media (max-width: 499px) {
 	#main-controls {
 		display: flex;

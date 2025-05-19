@@ -8,7 +8,28 @@ const hls = new Hls({
 	// out-of-memory killing on Firefox. The segments are never far away so we don't need to keep
 	// many.
 	backBufferLength: 3 * 60,
+	manifestLoadPolicy: {
+		default: {
+			maxTimeToFirstByteMs: Infinity,
+			maxLoadTimeMs: 20000,
+			timeoutRetry: {
+				maxNumRetry: 2,
+				retryDelayMs: 0,
+				maxRetryDelayMs: 0,
+			},
+			errorRetry: {
+				maxNumRetry: 5,
+				retryDelayMs: 500,
+				maxRetryDelayMs: 2000,
+				shouldRetry: (retryConfig, retryCount) => {
+					// A 404 error can occur when restarting the muxer
+					return retryCount < retryConfig.maxNumRetry;
+				},
+			},
+		},
+	},
 })
+
 window.flipcam = {
 	hls,
 	video,
@@ -262,4 +283,40 @@ function isElementInInitialViewport(elem) {
 updateControls()
 window.addEventListener('resize', () => {
 	updateControls()
+})
+
+let restarting = false
+document.getElementById('restart-muxer').addEventListener('click', () => {
+	if (restarting) {
+		return
+	}
+	restarting = true
+	const isPlaying = !video.paused && !video.ended;
+	(async () => {
+	    try {
+			const response = await window.fetch('/restart-muxer', {
+				method: 'POST',
+			})
+			if (response.status === 200) {
+				const newPath = await response.text()
+				/** @var URL */
+				let currentUrl
+				try {
+					currentUrl = new URL(playListUrl.value)
+				} catch {
+					currentUrl = new URL(document.location.href)
+				}
+				currentUrl.pathname = newPath
+				playListUrl.value = currentUrl.toString()
+				hls.loadSource(playListUrl.value)
+				if (isPlaying) {
+					video.play()
+				}
+			}
+		} catch (error) {
+			console.error('Failed to restart muxer: ', error)
+		} finally {
+			restarting = false
+		}
+	})().catch(console.error);
 })

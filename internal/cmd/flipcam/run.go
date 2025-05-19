@@ -12,6 +12,7 @@ import (
 )
 
 var hlsOutputDir string
+var hlsUrlPathPrefix string
 
 var runCmd = &cobra.Command{
 	Use:     "run",
@@ -22,7 +23,8 @@ var runCmd = &cobra.Command{
 		stopSig := make(chan os.Signal, 1)
 		signal.Notify(stopSig, os.Interrupt, syscall.SIGTERM)
 		flipcam := flipcamlib.FlipCam{
-			HlsOutputDir: hlsOutputDir,
+			HlsOutputDir:     hlsOutputDir,
+			HlsUrlPathPrefix: hlsUrlPathPrefix,
 		}
 		flipcam.Init()
 		go func() {
@@ -55,6 +57,12 @@ func init() {
 		"hls-output-dir",
 		"",
 		"Sets the directory where the HLS segments and playlists are stored.",
+	)
+	runCmd.Flags().StringVar(
+		&hlsUrlPathPrefix,
+		"hls-url-path-prefix",
+		"/camera",
+		"Sets the path prefix for the playlist URL.",
 	)
 	err := runCmd.MarkFlagRequired("hls-output-dir")
 	if err != nil {

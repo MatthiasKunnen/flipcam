@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"sync"
@@ -14,9 +15,12 @@ import (
 )
 
 type FlipCam struct {
-	HlsOutputDir string
-	stop         chan struct{}
-	stopped      chan struct{}
+	HlsOutputDir      string
+	HlsUrlPathPrefix  string
+	hlsPlayListPath   string
+	hlsPlayListPathMu sync.RWMutex
+	stop              chan struct{}
+	stopped           chan struct{}
 }
 
 func (f *FlipCam) Init() {
@@ -26,15 +30,14 @@ func (f *FlipCam) Init() {
 
 func (f *FlipCam) Start() error {
 	var wg sync.WaitGroup
-	muxer := RtmpToHlsMuxer{
-		Url: "rtmp://0.0.0.0:1935/camera/",
-	}
-	var playlistPath string
-	playlistPathMutex := sync.RWMutex{}
-	restartMuxer := make(chan struct{})
+	restartMuxer := make(chan chan struct{})
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		internalRestartChan := make(chan chan struct{}, 1)
+		muxer := RtmpToHlsMuxer{
+			Url: "rtmp://0.0.0.0:1935/camera/",
+		}
 
 		for {
 			var prefix string
@@ -46,12 +49,20 @@ func (f *FlipCam) Start() error {
 				}
 			}
 			muxer.Prefix = prefix + "_"
-			muxer.PlaylistPath = path.Join(f.HlsOutputDir, prefix+".m3u8")
-			playlistPathMutex.Lock()
-			playlistPath = muxer.PlaylistPath
-			playlistPathMutex.Unlock()
+			newPlaylistFile := prefix + ".m3u8"
+			muxer.PlaylistPath = path.Join(f.HlsOutputDir, newPlaylistFile)
+			err := f.setPlayListUrlPath(newPlaylistFile)
+			if err != nil {
+				log.Fatalf("Failed to set playlist path: %v", err)
+			}
 
-			err := muxer.Start()
+			select {
+			case done := <-internalRestartChan:
+				close(done)
+			default:
+			}
+
+			err = muxer.Start()
 			if err != nil {
 				log.Printf("[muxer]: failed to start: %v\n", err)
 			}
@@ -62,7 +73,10 @@ func (f *FlipCam) Start() error {
 				defer wg.Done()
 				select {
 				case <-f.stop:
-				case <-restartMuxer:
+				case done := <-restartMuxer:
+					if done != nil {
+						internalRestartChan <- done
+					}
 				case <-runEnd:
 					return
 				}
@@ -98,13 +112,22 @@ func (f *FlipCam) Start() error {
 		http.Handle("/static/", http.StripPrefix("/static/", static))
 
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			playlistPathMutex.RLock()
-			playlistUrlPath := "https://flipcam.sd4u.be/camera/" + path.Base(playlistPath)
-			playlistPathMutex.RUnlock()
+			playlistUrlPath := "https://flipcam.sd4u.be" + f.getPlayListUrlPath()
 			err := Index(playlistUrlPath).Render(r.Context(), w)
 			if err != nil {
 				log.Printf("web: failed to render: %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
+			}
+		})
+
+		http.HandleFunc("/restart-muxer", func(w http.ResponseWriter, r *http.Request) {
+			done := make(chan struct{})
+			restartMuxer <- done
+			<-done
+			w.Header().Set("Content-Type", "text/plain")
+			_, err := w.Write([]byte(f.getPlayListUrlPath()))
+			if err != nil {
+				log.Printf("web: failed to write new playlist path: %v\n", err)
 			}
 		})
 
@@ -153,4 +176,22 @@ func (f *FlipCam) Shutdown(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func (f *FlipCam) setPlayListUrlPath(playlistFile string) error {
+	newPath, err := url.JoinPath(f.HlsUrlPathPrefix, playlistFile)
+	if err != nil {
+		return err
+	}
+
+	f.hlsPlayListPathMu.Lock()
+	f.hlsPlayListPath = newPath
+	f.hlsPlayListPathMu.Unlock()
+	return nil
+}
+
+func (f *FlipCam) getPlayListUrlPath() string {
+	f.hlsPlayListPathMu.RLock()
+	defer f.hlsPlayListPathMu.RUnlock()
+	return f.hlsPlayListPath
 }
