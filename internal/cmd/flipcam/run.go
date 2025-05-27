@@ -28,18 +28,20 @@ var runCmd = &cobra.Command{
 			HlsUrlPathPrefix: hlsUrlPathPrefix,
 		}
 		flipcam.Init()
+		flipcamStopped := make(chan error)
 		go func() {
 			err := flipcam.Start()
 			if err != nil {
 				log.Fatalf("Failed to start flipcam: %v", err)
 			}
 
-			err = flipcam.Wait()
+			flipcamStopped <- flipcam.Wait()
+		}()
+		select {
+		case err := <-flipcamStopped:
 			if err != nil {
 				log.Fatalf("Flipcam exited with error: %v", err)
 			}
-		}()
-		select {
 		case <-stopSig:
 			log.Println("Exit signal received, stopping flipcam.")
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*6)
