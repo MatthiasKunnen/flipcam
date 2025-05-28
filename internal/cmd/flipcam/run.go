@@ -23,11 +23,11 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		stopSig := make(chan os.Signal, 1)
 		signal.Notify(stopSig, os.Interrupt, syscall.SIGTERM)
-		flipcam := flipcamlib.FlipCam{
+		flipcam := flipcamlib.New(flipcamlib.Opts{
 			HlsOutputDir:     hlsOutputDir,
 			HlsUrlPathPrefix: hlsUrlPathPrefix,
-		}
-		flipcam.Init()
+			UiPort:           uiPort,
+		})
 		flipcamStopped := make(chan error)
 		go func() {
 			err := flipcam.Start()

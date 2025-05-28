@@ -15,11 +15,11 @@ var genConfCmd = &cobra.Command{
 	Example: `flipcam genconf --hls-output-dir /tmp/hls`,
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		flipcam := flipcamlib.FlipCam{
+		flipcam := flipcamlib.New(flipcamlib.Opts{
 			HlsOutputDir:     hlsOutputDir,
 			HlsUrlPathPrefix: hlsUrlPathPrefix,
-		}
-		flipcam.Init()
+			UiPort:           uiPort,
+		})
 		f, err := os.Create("caddyFromGo.json")
 		if err != nil {
 			log.Fatal(err)

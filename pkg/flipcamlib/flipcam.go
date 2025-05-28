@@ -17,25 +17,37 @@ import (
 var origin = "https://flipcam.sd4u.be"
 var host = "flipcam.sd4u.be"
 
+type Opts struct {
+	HlsOutputDir     string
+	HlsUrlPathPrefix string
+	UiPort           string
+}
+
 type FlipCam struct {
-	HlsOutputDir      string
-	HlsUrlPathPrefix  string
-	UiPort            string
+	hlsOutputDir      string
 	hlsPlayListPath   string
 	hlsPlayListPathMu sync.RWMutex
+	hlsUrlPathPrefix  string
 	shutdownErr       error
 	shutdownErrMu     sync.Mutex
 	shutdownOnce      sync.Once
 	stop              chan struct{}
 	stopped           chan struct{}
+	uiPort            string
 }
 
-func (f *FlipCam) Init() {
-	f.stop = make(chan struct{})
-	f.stopped = make(chan struct{})
-	if f.UiPort == "" {
-		f.UiPort = ":3000"
+func New(opts Opts) *FlipCam {
+	if opts.UiPort == "" {
+		opts.UiPort = ":3000"
 	}
+
+	f := &FlipCam{
+		stop:    make(chan struct{}),
+		stopped: make(chan struct{}),
+		uiPort:  opts.UiPort,
+	}
+
+	return f
 }
 
 func (f *FlipCam) Start() error {
@@ -53,14 +65,14 @@ func (f *FlipCam) Start() error {
 			var prefix string
 			for {
 				prefix = rand.Text()[:6]
-				_, err := os.Stat(path.Join(f.HlsOutputDir, prefix+".m3u8"))
+				_, err := os.Stat(path.Join(f.hlsOutputDir, prefix+".m3u8"))
 				if errors.Is(err, os.ErrNotExist) {
 					break
 				}
 			}
 			muxer.Prefix = prefix + "_"
 			newPlaylistFile := prefix + ".m3u8"
-			muxer.PlaylistPath = path.Join(f.HlsOutputDir, newPlaylistFile)
+			muxer.PlaylistPath = path.Join(f.hlsOutputDir, newPlaylistFile)
 			err := f.setPlayListUrlPath(newPlaylistFile)
 			if err != nil {
 				log.Fatalf("Failed to set playlist path: %v", err)
@@ -117,7 +129,7 @@ func (f *FlipCam) Start() error {
 	}()
 
 	go func() {
-		srv := http.Server{Addr: f.UiPort}
+		srv := http.Server{Addr: f.uiPort}
 		static := http.FileServer(http.Dir("./static"))
 		http.Handle("/static/", http.StripPrefix("/static/", static))
 
@@ -205,7 +217,7 @@ func (f *FlipCam) addShutdownError(err error) {
 }
 
 func (f *FlipCam) setPlayListUrlPath(playlistFile string) error {
-	newPath, err := url.JoinPath(f.HlsUrlPathPrefix, playlistFile)
+	newPath, err := url.JoinPath(f.hlsUrlPathPrefix, playlistFile)
 	if err != nil {
 		return err
 	}

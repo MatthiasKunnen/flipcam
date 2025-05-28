@@ -60,7 +60,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 			{
 				"match", []OrderedObject[interface{}]{
 					{
-						{"path", []string{f.HlsUrlPathPrefix + "/*"}},
+						{"path", []string{f.hlsUrlPathPrefix + "/*"}},
 						{
 							"header_regexp", OrderedObject[interface{}]{
 								{
@@ -96,7 +96,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 			{
 				"match", []OrderedObject[interface{}]{
 					{
-						{"path", []string{f.HlsUrlPathPrefix + "/*"}},
+						{"path", []string{f.hlsUrlPathPrefix + "/*"}},
 					},
 				},
 			},
@@ -137,7 +137,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 					{
 						{"handler", "file_server"},
 						{"index_names", []string{}},
-						{"root", f.HlsOutputDir},
+						{"root", f.hlsOutputDir},
 					},
 				},
 			},
@@ -152,7 +152,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 						{
 							"upstreams", []OrderedObject[interface{}]{
 								{
-									{"dial", "localhost" + f.UiPort},
+									{"dial", "localhost" + f.uiPort},
 								},
 							},
 						},
