@@ -23,6 +23,9 @@ type FlipCam struct {
 	UiPort            string
 	hlsPlayListPath   string
 	hlsPlayListPathMu sync.RWMutex
+	shutdownErr       error
+	shutdownErrMu     sync.Mutex
+	shutdownOnce      sync.Once
 	stop              chan struct{}
 	stopped           chan struct{}
 }
@@ -91,7 +94,7 @@ func (f *FlipCam) Start() error {
 				defer cancel()
 				err := muxer.Shutdown(ctx)
 				if err != nil {
-					log.Printf("[muxer]: failed to shutdown: %v\n", err)
+					f.addShutdownError(fmt.Errorf("[muxer]: error during shutdown: %w", err))
 				}
 			}()
 
@@ -145,7 +148,7 @@ func (f *FlipCam) Start() error {
 			err := srv.ListenAndServe()
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Printf("web: http listener failed: %v\n", err)
-				f.Shutdown(context.Background())
+				_ = f.Shutdown(context.Background())
 			}
 		}()
 		wg.Add(1)
@@ -156,7 +159,7 @@ func (f *FlipCam) Start() error {
 			defer release()
 			err := srv.Shutdown(ctx)
 			if err != nil {
-				log.Printf("web: error during shutdown: %v\n", err)
+				f.addShutdownError(fmt.Errorf("[web]: error during shutdown: %w", err))
 			} else {
 				log.Println("web: shutdown cleanly")
 			}
@@ -172,17 +175,33 @@ func (f *FlipCam) Start() error {
 
 func (f *FlipCam) Wait() error {
 	<-f.stopped
-	return nil
+	f.shutdownErrMu.Lock()
+	defer f.shutdownErrMu.Unlock()
+	return f.shutdownErr
 }
 
+// Shutdown stops flipcam and makes Wait return.
+// If any error occurs, both Shutdown and Wait will return it.
+// Shutdown is goroutine safe and can be called multiple times.
 func (f *FlipCam) Shutdown(ctx context.Context) error {
-	close(f.stop)
-	select {
-	case <-f.stopped:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
+	f.shutdownOnce.Do(func() {
+		close(f.stop)
+		select {
+		case <-f.stopped:
+		case <-ctx.Done():
+			f.addShutdownError(ctx.Err())
+		}
+	})
+
+	f.shutdownErrMu.Lock()
+	defer f.shutdownErrMu.Unlock()
+	return f.shutdownErr
+}
+
+func (f *FlipCam) addShutdownError(err error) {
+	f.shutdownErrMu.Lock()
+	defer f.shutdownErrMu.Unlock()
+	f.shutdownErr = errors.Join(f.shutdownErr, err)
 }
 
 func (f *FlipCam) setPlayListUrlPath(playlistFile string) error {
