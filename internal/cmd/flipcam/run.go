@@ -5,6 +5,7 @@ import (
 	"github.com/MatthiasKunnen/flipcam/pkg/flipcamlib"
 	"github.com/spf13/cobra"
 	"log"
+	"net/netip"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,7 +14,9 @@ import (
 
 var hlsOutputDir string
 var hlsUrlPathPrefix string
+var routerIp = ipv4Flag(netip.MustParsePrefix("192.168.23.1/24"))
 var uiPort string
+var wirelessInterface string
 
 var runCmd = &cobra.Command{
 	Use:     "run",
@@ -24,13 +27,15 @@ var runCmd = &cobra.Command{
 		stopSig := make(chan os.Signal, 1)
 		signal.Notify(stopSig, os.Interrupt, syscall.SIGTERM)
 		flipcam := flipcamlib.New(flipcamlib.Opts{
-			HlsOutputDir:     hlsOutputDir,
-			HlsUrlPathPrefix: hlsUrlPathPrefix,
-			UiPort:           uiPort,
+			HlsOutputDir:      hlsOutputDir,
+			HlsUrlPathPrefix:  hlsUrlPathPrefix,
+			RouterAddr:        routerIp.Prefix(),
+			UiPort:            uiPort,
+			WirelessInterface: wirelessInterface,
 		})
 		flipcamStopped := make(chan error)
 		go func() {
-			err := flipcam.Start()
+			err := flipcam.Start(context.Background())
 			if err != nil {
 				log.Fatalf("Failed to start flipcam: %v", err)
 			}
@@ -57,5 +62,7 @@ var runCmd = &cobra.Command{
 func init() {
 	addHlsOutputDirFlag(runCmd, &hlsOutputDir)
 	addHlsUrlPathPrefixFlag(runCmd, &hlsUrlPathPrefix)
+	addInterfaceFlag(runCmd, &wirelessInterface)
+	addIpv4Flag(runCmd, &routerIp)
 	addUiPortFlag(runCmd, &uiPort)
 }

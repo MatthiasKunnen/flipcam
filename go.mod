@@ -5,6 +5,7 @@ go 1.24.2
 tool github.com/a-h/templ/cmd/templ
 
 require (
+	github.com/MatthiasKunnen/systemctl v1.0.0
 	github.com/a-h/templ v0.3.857
 	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8
 	github.com/spf13/cobra v1.9.1

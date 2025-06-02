@@ -27,6 +27,27 @@ func addHlsUrlPathPrefixFlag(cmd *cobra.Command, stringVar *string) {
 	)
 }
 
+func addInterfaceFlag(cmd *cobra.Command, stringVar *string) {
+	cmd.Flags().StringVar(
+		stringVar,
+		"wireless-interface",
+		"",
+		"Sets the name of the wireless interface to use.",
+	)
+	err := cmd.MarkFlagRequired("wireless-interface")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func addIpv4Flag(cmd *cobra.Command, v *ipv4Flag) {
+	cmd.Flags().Var(
+		v,
+		"ip",
+		"Sets the ip for the AP. CIDR notation.",
+	)
+}
+
 func addUiPortFlag(cmd *cobra.Command, stringVar *string) {
 	cmd.Flags().StringVar(
 		stringVar,

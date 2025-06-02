@@ -3,10 +3,12 @@ package flipcamlib
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"io"
 )
 
-func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
-	goProApi := "api.gopro.com"
+var goProApi = "api.gopro.com"
+
+func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 	goProRoutes := []OrderedObject[interface{}]{
 		{
 			{
@@ -34,7 +36,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 			{
 				"match", []OrderedObject[interface{}]{
 					{
-						{"path", []string{f.HlsUrlPathPrefix + "/*.m3u8"}},
+						{"path", []string{f.hlsUrlPathPrefix + "/*.m3u8"}},
 					},
 				},
 			},
@@ -276,7 +278,7 @@ func (f *FlipCam) GenerateCaddyConfig() OrderedObject[interface{}] {
 		},
 	}
 
-	return config
+	return json.MarshalWrite(w, config, jsontext.WithIndent("\t"))
 }
 
 type OrderedObject[V any] []ObjectMember[V]

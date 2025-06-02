@@ -1,3 +1,5 @@
+github.com/MatthiasKunnen/systemctl v1.0.0 h1:pjiuitl3FqfJuoPtrpgps/eh2uRzDJ+CA99s60K28Zw=
+github.com/MatthiasKunnen/systemctl v1.0.0/go.mod h1:DRH9h01BO2mzYiPqJeNPYjNb+g/Q1a+Tg1+imqlpvmU=
 github.com/a-h/parse v0.0.0-20250122154542-74294addb73e h1:HjVbSQHy+dnlS6C3XajZ69NYAb5jbGNfHanvm1+iYlo=
 github.com/a-h/parse v0.0.0-20250122154542-74294addb73e/go.mod h1:3mnrkvGpurZ4ZrTDbYU84xhwXW2TjTKShSwjRi2ihfQ=
 github.com/a-h/templ v0.3.857 h1:6EqcJuGZW4OL+2iZ3MD+NnIcG7nGkaQeF2Zq5kf9ZGg=
