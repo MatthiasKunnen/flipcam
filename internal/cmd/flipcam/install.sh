@@ -81,3 +81,15 @@ fi
 echo "Setting ownership and permissions for /var/lib/caddy..."
 chown caddy:caddy /var/lib/caddy
 chmod 700 /var/lib/caddy
+
+if [ ! -d "{{.HlsOutputDir}}" ]; then
+  echo "Creating HLS output dir: {{.HlsOutputDir}}"
+  mkdir -p "{{.HlsOutputDir}}"
+fi
+
+chmod 2770 "{{.HlsOutputDir}}"
+chown root:flipcam "{{.HlsOutputDir}}"
+setfacl -m g:flipcam:rx "{{.HlsOutputDir}}"
+setfacl -m d:g:flipcamB:rx "{{.HlsOutputDir}}"
+
+# @todo check if caddy can read the HLS output dir

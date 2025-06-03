@@ -13,13 +13,9 @@ func addHlsOutputDirFlag(cmd *cobra.Command, stringVar *string) {
 	cmd.Flags().StringVar(
 		stringVar,
 		"hls-output-dir",
-		"",
+		"/srv/flipcam/hls",
 		"Sets the directory where the HLS segments and playlists are stored.",
 	)
-	err := cmd.MarkFlagRequired("hls-output-dir")
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func addHlsUrlPathPrefixFlag(cmd *cobra.Command, stringVar *string) {

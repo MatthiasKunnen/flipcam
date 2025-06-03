@@ -169,6 +169,7 @@ var genConfCmd = &cobra.Command{
 			"CaddyServiceName":   flipcam.ServiceNameCaddy(),
 			"DnsmasqConfPath":    flipcamlib.DnsmasqConfPath,
 			"DnsmasqServiceName": flipcam.ServiceNameDnsmasq(),
+			"HlsOutputDir":       hlsOutputDir,
 			"HostapdConfPath":    flipcamlib.HostapdConfPath,
 			"HostapdServiceName": flipcam.ServiceNameHostapd(),
 			"PolkitFilename":     polkitFilename,
