@@ -36,7 +36,12 @@ MemoryAccounting=true
 MemoryDenyWriteExecute=true
 NoNewPrivileges=true
 PrivateDevices=true
+{{- if .PrivateTmp}}
 PrivateTmp=true
+{{- else}}
+# HLS output in /tmp, cannot use private /tmp
+PrivateTmp=false
+{{- end}}
 ProcSubset=pid
 ProtectClock=true
 ProtectControlGroups=true

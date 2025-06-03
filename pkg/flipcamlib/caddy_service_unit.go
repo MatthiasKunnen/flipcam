@@ -13,6 +13,7 @@ var caddyServiceTmpl = template.Must(template.New("caddy.service").Parse(caddySe
 type CaddyServiceUnitOptions struct {
 	BinaryPath string
 	ConfigPath string
+	PrivateTmp bool
 }
 
 func (f *FlipCam) GenerateCaddyServiceUnit(w io.Writer, opts CaddyServiceUnitOptions) error {

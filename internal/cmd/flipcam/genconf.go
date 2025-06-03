@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 	"text/template"
 )
 
@@ -59,6 +60,7 @@ var genConfCmd = &cobra.Command{
 		err = flipcam.GenerateCaddyServiceUnit(caddyServiceF, flipcamlib.CaddyServiceUnitOptions{
 			BinaryPath: caddyBinaryPath,
 			ConfigPath: "/etc/flipcam/caddy.json",
+			PrivateTmp: !strings.HasPrefix(hlsOutputDir, os.TempDir()+"/"),
 		})
 		if err != nil {
 			log.Fatalf("failed to generate %s: %v", flipcam.ServiceNameCaddy(), err)
