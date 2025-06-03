@@ -2,7 +2,7 @@ package chanwg
 
 import "sync"
 
-// WaitGroup is a synchronization primitive similar to [sync.WaitGroup].
+// WaitGroup is a single-use synchronization primitive similar to [sync.WaitGroup].
 // Instead of a blocking Wait method, it exposes a channel that closes when all tracked
 // operations have completed.
 //
@@ -27,6 +27,8 @@ func New() *WaitGroup {
 
 // Add increments the counter by the given positive delta.
 // Add must be called before the corresponding operations begin execution.
+//
+// Add may not be called after the wait channel has completed.
 func (cwg *WaitGroup) Add(delta int32) {
 	if delta == 0 {
 		return
@@ -35,12 +37,7 @@ func (cwg *WaitGroup) Add(delta int32) {
 	cwg.mu.Lock()
 	defer cwg.mu.Unlock()
 	if cwg.closed {
-		if cwg.counter != 0 {
-			// Sanity check, should never occur
-			panic("chanwg: WaitGroup closed and counter is not zero")
-		}
-		cwg.done = make(chan struct{})
-		cwg.closed = false
+		panic("chanwg: WaitGroup already closed")
 	}
 
 	cwg.counter += delta
@@ -59,6 +56,7 @@ func (cwg *WaitGroup) Add(delta int32) {
 //
 // Panics if:
 //   - Done is called more times than Add
+//   - the group has already been closed
 func (cwg *WaitGroup) Done() {
 	cwg.Add(-1)
 }

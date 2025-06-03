@@ -8,6 +8,7 @@ import (
 )
 
 const tooManyDoneCallsPanic = "chanwg: negative WaitGroup counter, too many Done calls"
+const alreadyClosedPanic = "chanwg: WaitGroup already closed"
 
 func TestNew(t *testing.T) {
 	t.Parallel()
@@ -123,8 +124,8 @@ func TestWaitGroupMoreDoneThanAdd(t *testing.T) {
 		r := recover()
 		if r == nil {
 			t.Error("Expected panic when calling Done more times than Add")
-		} else if msg := r.(string); msg != tooManyDoneCallsPanic {
-			t.Errorf("Unexpected panic message: %s, expected %s", msg, tooManyDoneCallsPanic)
+		} else if msg := r.(string); msg != alreadyClosedPanic {
+			t.Errorf("Unexpected panic message: %s, expected %s", msg, alreadyClosedPanic)
 		}
 	}()
 	wg.Done() // This should panic
@@ -171,15 +172,16 @@ func TestWaitGroupReuseAfterCompletion(t *testing.T) {
 		t.Fatal("WaitChan should be closed")
 	}
 
+	// Attempting to reuse should panic
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("Expected panic when trying to reuse a completed WaitGroup")
+		} else if msg := r.(string); msg != alreadyClosedPanic {
+			t.Errorf("Unexpected panic message: %s, expected %s", msg, alreadyClosedPanic)
+		}
+	}()
 	wg.Add(1)
-	wg.Done()
-
-	select {
-	case <-wg.WaitChan():
-		// Expected
-	case <-time.After(10 * time.Millisecond):
-		t.Fatal("WaitChan should be closed")
-	}
 }
 
 func TestWaitGroupWaitChanMultipleCalls(t *testing.T) {
