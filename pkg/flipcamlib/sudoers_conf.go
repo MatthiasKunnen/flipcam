@@ -12,7 +12,10 @@ var sudoersConfTmpl = template.Must(template.New("sudoers.conf").Parse(`
 `))
 
 func (f *FlipCam) GenerateSudoersConf(writer io.Writer) error {
-	commands := []string{}
+	commands := []string{
+		strings.Join(f.ipAddrAdd(), " "),
+		strings.Join(f.ipAddrRemove(), " "),
+	}
 
 	if len(commands) == 0 {
 		return nil
