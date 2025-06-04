@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func (f *FlipCam) setupInterface(ctx context.Context) {
+func (f *FlipCam) setupNetwork(ctx context.Context) {
 	var shutdownFuncs []func()
 	iface, err := net.InterfaceByName(f.wirelessInterface)
 	if err != nil {
