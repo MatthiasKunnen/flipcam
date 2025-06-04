@@ -36,7 +36,8 @@ func (f *FlipCam) runMuxer(ctx context.Context) {
 		muxer.PlaylistPath = path.Join(f.hlsOutputDir, newPlaylistFile)
 		err := f.setPlayListUrlPath(newPlaylistFile)
 		if err != nil {
-			log.Fatalf("Failed to set playlist path: %v", err)
+			f.stopWithError(fmt.Errorf("[muxer]: failed to set playlist path: %w", err))
+			return
 		}
 
 		err = muxer.Start()
