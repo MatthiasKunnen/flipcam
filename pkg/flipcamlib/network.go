@@ -3,6 +3,7 @@ package flipcamlib
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -44,18 +45,37 @@ func (f *FlipCam) setupNetwork(ctx context.Context) {
 		}
 	}
 
+	var nmSetManaged bool
 	state, err := getNetworkManagerDeviceState(ctx, f.wirelessInterface)
+	var exitError *exec.ExitError
+	switch {
+	case errors.Is(err, exec.ErrNotFound):
+		// NetworkManager not used in system
+	case errors.As(err, &exitError):
+		switch exitError.ExitCode() {
+		case NM_EXIT_NOT_RUNNING:
+		default:
+			f.stopWithError(fmt.Errorf(
+				"nmcli exited with an unexpected exit code: %d, %v",
+				exitError.ExitCode(),
+				err,
+			))
+			return
+		}
+	case err != nil:
+		f.stopWithError(fmt.Errorf("nmcli error: %v", err))
+		return
+	default:
+		switch state {
+		case NM_DEVICE_STATE_UNMANAGED:
+		default:
+			nmSetManaged = true
+		}
+	}
+
 	if err != nil {
 		f.stopWithError(err)
 		return
-	}
-
-	var changeManaged bool
-	switch state {
-	case NM_DEVICE_STATE_UNMANAGED:
-		changeManaged = false
-	default:
-		changeManaged = true
 	}
 
 	go func() {
@@ -67,7 +87,7 @@ func (f *FlipCam) setupNetwork(ctx context.Context) {
 		}
 	}()
 
-	if changeManaged {
+	if nmSetManaged {
 		shutdownFuncs = append(shutdownFuncs, func() {
 			// @todo add shutdown context
 			err := sudoCommand(context.TODO(), f.nmcliEnableManagedCmd()).Run()
@@ -154,6 +174,20 @@ func (f *FlipCam) nmcliEnableManagedCmd() []string {
 	}
 }
 
+const (
+	NM_EXIT_SUCCESS int = iota
+	NM_EXIT_ERROR_UNKNOWN
+	NM_EXIT_INVALID_INPUT
+	NM_EXIT_TIMEOUT_EXPIRED
+	NM_EXIT_CONNECTION_ACTIVATION_FAILED
+	NM_EXIT_CONNECTION_DEACTIVATION_FAILED
+	NM_EXIT_DISCONNECTING_DEVICE_FAILED
+	NM_EXIT_CONNECTION_DELETION_FAILED
+	NM_EXIT_NOT_RUNNING
+	// NM_EXIT_NOT_FOUND indicates that the connection, device, or access point does not exist.
+	NM_EXIT_NOT_FOUND = 10
+)
+
 // NmDeviceState represents the state of a network device in NetworkManager.
 type NmDeviceState int
 
@@ -221,7 +255,7 @@ const (
 func getNetworkManagerDeviceState(ctx context.Context, device string) (NmDeviceState, error) {
 	output, err := exec.CommandContext(
 		ctx,
-		"nmcli",
+		"/usr/bin/nmcli",
 		"--get-values",
 		"general.state",
 		"device",
