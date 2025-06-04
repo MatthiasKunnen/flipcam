@@ -12,7 +12,7 @@ import "sync"
 // WaitGroup requires at least one Add and corresponding Done before completing.
 // This allows you to extract the channel before calling Add.
 type WaitGroup struct {
-	counter int32
+	counter int
 	closed  bool
 	mu      sync.Mutex
 	done    chan struct{}
@@ -22,7 +22,7 @@ type WaitGroup struct {
 // Add must be called before the corresponding operations begin execution.
 //
 // Add may not be called after the wait channel has completed.
-func (cwg *WaitGroup) Add(delta int32) {
+func (cwg *WaitGroup) Add(delta int) {
 	if delta == 0 {
 		return
 	}
