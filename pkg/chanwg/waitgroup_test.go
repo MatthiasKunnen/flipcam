@@ -10,24 +10,9 @@ import (
 const tooManyDoneCallsPanic = "chanwg: negative WaitGroup counter, too many Done calls"
 const alreadyClosedPanic = "chanwg: WaitGroup already closed"
 
-func TestNew(t *testing.T) {
-	t.Parallel()
-	wg := chanwg.New()
-	if wg == nil {
-		t.Error("New() returned nil")
-	}
-	// Ensure the done channel is not closed initially
-	select {
-	case <-wg.WaitChan():
-		t.Error("New WaitGroup's channel should not be closed immediately")
-	default:
-		// Expected
-	}
-}
-
 func TestWaitGroupBasic(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(1)
 
 	done := make(chan struct{})
@@ -55,7 +40,7 @@ func TestWaitGroupBasic(t *testing.T) {
 
 func TestWaitGroupMultipleAdds(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(3)
 
 	go func() {
@@ -84,7 +69,7 @@ func TestWaitGroupMultipleAdds(t *testing.T) {
 
 func TestWaitGroupConcurrentDone(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	count := 100
 	wg.Add(int32(count))
 
@@ -117,7 +102,7 @@ func TestWaitGroupConcurrentDone(t *testing.T) {
 
 func TestWaitGroupMoreDoneThanAdd(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(1)
 	wg.Done()
 	defer func() {
@@ -133,7 +118,7 @@ func TestWaitGroupMoreDoneThanAdd(t *testing.T) {
 
 func TestWaitGroupDoneOnEmptyGroupPanics(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	defer func() {
 		r := recover()
 		if r == nil {
@@ -147,7 +132,7 @@ func TestWaitGroupDoneOnEmptyGroupPanics(t *testing.T) {
 
 func TestWaitGroupZeroAddNoCompletion(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	// Adding 0 should not close the channel, as the requirement is "at least one Add and corresponding Done"
 	wg.Add(0)
 
@@ -161,7 +146,7 @@ func TestWaitGroupZeroAddNoCompletion(t *testing.T) {
 
 func TestWaitGroupReuseAfterCompletion(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(1)
 	wg.Done()
 
@@ -186,7 +171,7 @@ func TestWaitGroupReuseAfterCompletion(t *testing.T) {
 
 func TestWaitGroupWaitChanMultipleCalls(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(1)
 
 	ch1 := wg.WaitChan()
@@ -220,7 +205,7 @@ func TestWaitGroupWaitChanMultipleCalls(t *testing.T) {
 }
 func TestWaitGroupWaitChanNestedGoroutines(t *testing.T) {
 	t.Parallel()
-	wg := chanwg.New()
+	var wg chanwg.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

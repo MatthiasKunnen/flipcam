@@ -10,19 +10,11 @@ import "sync"
 // in indefinitely. This allows abandoning a wait.
 //
 // WaitGroup requires at least one Add and corresponding Done before completing.
-//
-// WaitGroup must be created with New.
 type WaitGroup struct {
 	counter int32
 	closed  bool
 	mu      sync.Mutex
 	done    chan struct{}
-}
-
-func New() *WaitGroup {
-	return &WaitGroup{
-		done: make(chan struct{}),
-	}
 }
 
 // Add increments the counter by the given positive delta.
@@ -47,7 +39,9 @@ func (cwg *WaitGroup) Add(delta int32) {
 		panic("chanwg: negative WaitGroup counter, too many Done calls")
 	case cwg.counter == 0:
 		cwg.closed = true
-		close(cwg.done)
+		if cwg.done != nil {
+			close(cwg.done)
+		}
 	}
 }
 
@@ -63,5 +57,14 @@ func (cwg *WaitGroup) Done() {
 
 // WaitChan returns a channel that will be closed when all tracked operation are complete.
 func (cwg *WaitGroup) WaitChan() <-chan struct{} {
+	cwg.mu.Lock()
+	defer cwg.mu.Unlock()
+	if cwg.done == nil {
+		cwg.done = make(chan struct{})
+		if cwg.closed {
+			close(cwg.done)
+		}
+	}
+
 	return cwg.done
 }
