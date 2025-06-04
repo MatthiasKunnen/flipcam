@@ -130,6 +130,18 @@ func TestWaitGroupDoneOnEmptyGroupPanics(t *testing.T) {
 	wg.Done() // This should panic (equivalent to Add(-1) when counter is 0)
 }
 
+func TestWaitGroupWaitWithoutWork(t *testing.T) {
+	t.Parallel()
+	var wg chanwg.WaitGroup
+
+	select {
+	case <-wg.WaitChan():
+		t.Fatal("Wait completed despite no work added")
+	case <-time.After(100 * time.Millisecond):
+		// Expected
+	}
+}
+
 func TestWaitGroupZeroAddNoCompletion(t *testing.T) {
 	t.Parallel()
 	var wg chanwg.WaitGroup

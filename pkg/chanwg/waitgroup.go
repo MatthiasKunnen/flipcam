@@ -10,6 +10,7 @@ import "sync"
 // in indefinitely. This allows abandoning a wait.
 //
 // WaitGroup requires at least one Add and corresponding Done before completing.
+// This allows you to extract the channel before calling Add.
 type WaitGroup struct {
 	counter int32
 	closed  bool
