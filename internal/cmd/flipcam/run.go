@@ -39,6 +39,7 @@ var runCmd = &cobra.Command{
 			if err != nil {
 				log.Fatalf("Failed to start flipcam: %v", err)
 			}
+			log.Println("FlipCam started")
 
 			flipcamStopped <- flipcam.Wait()
 		}()
