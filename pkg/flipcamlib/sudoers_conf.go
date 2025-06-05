@@ -15,6 +15,8 @@ func (f *FlipCam) GenerateSudoersConf(writer io.Writer) error {
 	commands := []string{
 		strings.Join(f.ipAddrAdd(), " "),
 		strings.Join(f.ipAddrRemove(), " "),
+		strings.Join(f.nmcliDisableManagedCmd(), " "),
+		strings.Join(f.nmcliEnableManagedCmd(), " "),
 	}
 
 	if len(commands) == 0 {
