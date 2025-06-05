@@ -132,7 +132,7 @@ func (m *RtmpToHlsMuxer) Start() error {
 		default:
 			m.doneErr = err
 		}
-		m.done <- struct{}{}
+		close(done)
 	}()
 
 	return nil
