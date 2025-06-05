@@ -7,10 +7,9 @@ Wants=nss-lookup.target
 Conflicts=dnsmasq.service
 
 [Service]
-Type=dbus
-BusName=uk.org.thekelleys.dnsmasq
+Type=exec
 ExecStartPre=/usr/bin/dnsmasq --test --conf-file={{.ConfFilePath}}
-ExecStart=/usr/bin/dnsmasq -k --enable-dbus --user=dnsmasq --conf-file={{.ConfFilePath}} --pid-file
+ExecStart=/usr/bin/dnsmasq -k --user=dnsmasq --conf-file={{.ConfFilePath}} --pid-file
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 PrivateDevices=true
