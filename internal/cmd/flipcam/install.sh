@@ -90,6 +90,6 @@ fi
 chmod 2770 "{{.HlsOutputDir}}"
 chown root:flipcam "{{.HlsOutputDir}}"
 setfacl -m g:flipcam:rx "{{.HlsOutputDir}}"
-setfacl -m d:g:flipcamB:rx "{{.HlsOutputDir}}"
+setfacl -m d:g:flipcam:rx "{{.HlsOutputDir}}"
 
 # @todo check if caddy can read the HLS output dir
