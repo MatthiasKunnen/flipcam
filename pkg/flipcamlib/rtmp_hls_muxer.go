@@ -9,8 +9,10 @@ import (
 	"log"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -107,11 +109,32 @@ func (m *RtmpToHlsMuxer) Start() error {
 
 	m.cmd = cmd
 	m.stdin = stdin
-	m.stopped = make(chan struct{})
-	m.done = make(chan struct{})
+	stopped := make(chan struct{})
+	m.stopped = stopped
+	done := make(chan struct{}) // Make local variable to prevent race conditions
+	m.done = done
 	m.doneErr = nil
 
-	err = cmd.Start()
+	startErr := make(chan error)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		// Make ffmpeg run in a separate process group so that, if the main program receives a
+		// SIGINT, ffmpeg does not. ffmpeg needs to be gracefully stopped.
+		Setsid:    true,
+		Pdeathsig: syscall.SIGKILL, // ffmpeg receives this sig if flipcam exits unexpectedly
+	}
+	go func() {
+		// https://github.com/golang/go/issues/27505
+		// On Linux, pdeathsig will kill the child process when the thread dies,
+		// not when the process dies. runtime.LockOSThread ensures that as long
+		// as this function is executing that OS thread will still be around
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+
+		startErr <- cmd.Start()
+		<-done
+	}()
+
+	err = <-startErr
 	if err != nil {
 		return fmt.Errorf("muxer: failed to start: %w", err)
 	}
