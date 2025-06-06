@@ -320,3 +320,36 @@ document.getElementById('restart-muxer').addEventListener('click', () => {
 		}
 	})().catch(console.error);
 })
+
+/** @var {WakeLockSentinel | null} */
+let wakeLockSentinel = null;
+function updateWakePrevention() {
+	if (video.paused) {
+		if (wakeLockSentinel === null) {
+			// Do nothing
+		} else {
+			wakeLockSentinel.release().catch(err => console.error('error while releasing sentinel', err))
+			wakeLockSentinel = null
+		}
+	} else {
+		if (wakeLockSentinel == null || wakeLockSentinel.released) {
+			(async () => {
+				wakeLockSentinel = await navigator.wakeLock.request("screen")
+				wakeLockSentinel.addEventListener('release', () => {
+					updateWakePrevention();
+				})
+			})().catch(err => console.error('error requesting wakelock', err));
+		} else {
+			// Do nothing
+		}
+	}
+}
+video.addEventListener('play', () => {
+	updateWakePrevention()
+})
+video.addEventListener('pause', () => {
+	updateWakePrevention()
+})
+window.addEventListener('visibilityState', () => {
+	updateWakePrevention()
+})
