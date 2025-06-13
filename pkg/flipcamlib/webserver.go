@@ -6,12 +6,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 func (f *FlipCam) startWebserver(ctx context.Context) {
 	srv := http.Server{Addr: f.uiPort}
-	static := http.FileServer(http.Dir("./static"))
+	staticDirs := []string{
+		"./static",
+		"/srv/flipcam/static",
+	}
+	var httpDir http.Dir
+
+	for _, dir := range staticDirs {
+		_, err := os.Stat(dir)
+		if err != nil {
+			continue
+		}
+
+		httpDir = http.Dir(dir)
+		break
+	}
+
+	if httpDir == "" {
+		f.stopWithError(fmt.Errorf("no static files found to serve"))
+		return
+	}
+
+	static := http.FileServer(httpDir)
 	http.Handle("/static/", http.StripPrefix("/static/", static))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

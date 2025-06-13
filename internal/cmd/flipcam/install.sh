@@ -82,6 +82,8 @@ echo "Setting ownership and permissions for /var/lib/caddy..."
 chown caddy:caddy /var/lib/caddy
 chmod 700 /var/lib/caddy
 
+cp -r "$(realpath "$source_dir/../static")" /srv/flipcam/static
+
 if [ ! -d "{{.HlsOutputDir}}" ]; then
   echo "Creating HLS output dir: {{.HlsOutputDir}}"
   mkdir -p "{{.HlsOutputDir}}"
