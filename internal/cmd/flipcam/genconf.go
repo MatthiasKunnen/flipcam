@@ -156,13 +156,28 @@ var genConfCmd = &cobra.Command{
 			log.Fatalf("failed to close sudoers config file: %v", err)
 		}
 
+		err = rootCmd.GenBashCompletionFileV2(path.Join(outDir, "completion_bash"), true)
+		if err != nil {
+			log.Fatalf("failed to generate bash completion file: %v", err)
+		}
+
+		err = rootCmd.GenFishCompletionFile(path.Join(outDir, "completion_fish"), true)
+		if err != nil {
+			log.Fatalf("failed to generate fish completion file: %v", err)
+		}
+
+		err = rootCmd.GenZshCompletionFile(path.Join(outDir, "completion_zsh"))
+		if err != nil {
+			log.Fatalf("failed to generate zsh completion file: %v", err)
+		}
+
 		installF, err := os.OpenFile(
 			path.Join(outDir, "install.sh"),
 			os.O_RDWR|os.O_CREATE|os.O_TRUNC,
 			0777,
 		)
 		if err != nil {
-			return
+			log.Fatalf("failed to open install.sh: %v", err)
 		}
 		err = installTmpl.Execute(installF, map[string]interface{}{
 			"CaddyConfPath":      flipcamlib.CaddyConfPath,

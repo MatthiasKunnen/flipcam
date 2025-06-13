@@ -87,6 +87,15 @@ if [ ! -d "{{.HlsOutputDir}}" ]; then
   mkdir -p "{{.HlsOutputDir}}"
 fi
 
+mkdir -p "/usr/local/share/bash-completion/completions"
+cp "$source_dir/completion_bash" "/usr/local/share/bash-completion/completions/flipcam"
+
+mkdir -p "/usr/local/share/fish/vendor_completions.d"
+cp "$source_dir/completion_fish" "/usr/local/share/fish/vendor_completions.d/flipcam.fish"
+
+mkdir -p "/usr/local/share/zsh/site-functions"
+cp "$source_dir/completion_zsh" "/usr/local/share/zsh/site-functions/_flipcam"
+
 chmod 2770 "{{.HlsOutputDir}}"
 chown root:flipcam "{{.HlsOutputDir}}"
 setfacl -m g:caddy:rx "{{.HlsOutputDir}}"
