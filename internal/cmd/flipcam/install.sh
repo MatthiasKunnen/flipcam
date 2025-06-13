@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# Make sure you have built caddy using go build -C ./cmd/caddy
+# Make sure you have done the following before running the script:
+# - built caddy using go build -C ./cmd/caddy
+# - built flipcam using go build .
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -83,6 +85,8 @@ chown caddy:caddy /var/lib/caddy
 chmod 700 /var/lib/caddy
 
 cp -r "$(realpath "$source_dir/../static")" /srv/flipcam/static
+
+install -m 755 "$(realpath "$source_dir/../flipcam")" "/usr/local/bin/flipcam"
 
 if [ ! -d "{{.HlsOutputDir}}" ]; then
   echo "Creating HLS output dir: {{.HlsOutputDir}}"
