@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Make sure you have done the following before running the script:
-# - built caddy using go build -C ./cmd/caddy
+# - built caddy using go build -C ./cmd/caddy -o ../../caddy
 # - built flipcam using go build .
 
 set -euo pipefail
@@ -40,7 +40,7 @@ install -m 640 -g polkitd "$source_dir/{{.PolkitFilename}}" "/etc/polkit-1/rules
 systemctl daemon-reload
 
 # Install caddy
-install -m 755 "$source_dir/../cmd/caddy/caddy" "/usr/local/bin/caddy"
+install -m 755 "$(realpath "$source_dir/../caddy")" "/usr/local/bin/caddy"
 
 set +e
 if getent group caddy >/dev/null; then
