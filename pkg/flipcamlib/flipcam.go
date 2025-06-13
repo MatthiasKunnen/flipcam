@@ -194,5 +194,7 @@ func (f *FlipCam) getPlayListUrlPath() string {
 
 func (f *FlipCam) stopWithError(err error) {
 	f.addShutdownError(err)
-	_ = f.Shutdown(context.Background())
+	go func() {
+		_ = f.Shutdown(context.Background())
+	}()
 }
