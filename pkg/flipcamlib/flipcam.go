@@ -106,7 +106,6 @@ func New(opts Opts) *FlipCam {
 func (f *FlipCam) Start(ctx context.Context) error {
 	startFuncs := []func(ctx context.Context){
 		f.setupNetwork,
-		f.startServices,
 		f.runMuxer,
 		f.startWebserver,
 	}

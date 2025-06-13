@@ -127,6 +127,10 @@ func (f *FlipCam) setupNetwork(ctx context.Context) {
 		}
 	}
 
+	f.shutdownWg.Add(1)
+	f.startupWg.Add(1)
+	f.startServices(ctx)
+
 	f.startupWg.Done()
 }
 
