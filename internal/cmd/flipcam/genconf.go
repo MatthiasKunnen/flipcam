@@ -18,6 +18,7 @@ var installTmpl = template.Must(template.New("install.sh").Parse(installScript))
 
 var caddyBinaryPath string
 var hostname string
+var wpaPassphrase wpaPassphraseFlag
 
 var genConfCmd = &cobra.Command{
 	Use:     "genconf",
@@ -110,7 +111,9 @@ var genConfCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("failed to create hostapd config file: %v", err)
 		}
-		err = flipcam.GenerateHostapdConf(hostapdF)
+		err = flipcam.GenerateHostapdConf(hostapdF, flipcamlib.HostapdConfOpts{
+			WpaPassphrase: wpaPassphrase.String(),
+		})
 		if err != nil {
 			log.Fatalf("failed to generate hostapd config: %v", err)
 		}
@@ -212,6 +215,7 @@ func init() {
 	addInterfaceFlag(genConfCmd, &wirelessInterface)
 	addIpv4Flag(genConfCmd, &routerIp)
 	addUiPortFlag(genConfCmd, &hlsUrlPathPrefix)
+	addWpaPassphraseFlag(genConfCmd, &wpaPassphrase)
 	genConfCmd.Flags().StringVar(
 		&caddyBinaryPath,
 		"caddy-binary-path",

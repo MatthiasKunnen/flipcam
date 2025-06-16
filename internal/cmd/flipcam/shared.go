@@ -93,3 +93,16 @@ func addUiPortFlag(cmd *cobra.Command, stringVar *string) {
 		"Sets the port for the UI interface in the :port format.",
 	)
 }
+
+func addWpaPassphraseFlag(cmd *cobra.Command, v *wpaPassphraseFlag) {
+	flagName := "wireless-passphrase"
+	cmd.Flags().Var(
+		v,
+		flagName,
+		"Sets the WPA passphrase for the AP. 8 to 63 printable ASCII characters.",
+	)
+	err := cmd.MarkFlagRequired(flagName)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

@@ -10,9 +10,14 @@ import (
 var hostapdConfTemplString string
 var hostapdConfTmpl = template.Must(template.New("hostapd.conf").Parse(hostapdConfTemplString))
 
-func (f *FlipCam) GenerateHostapdConf(w io.Writer) error {
+type HostapdConfOpts struct {
+	WpaPassphrase string
+}
+
+func (f *FlipCam) GenerateHostapdConf(w io.Writer, opts HostapdConfOpts) error {
 	return hostapdConfTmpl.Execute(w, map[string]interface{}{
-		"Interface": f.wirelessInterface,
+		"Interface":     f.wirelessInterface,
+		"WpaPassphrase": opts.WpaPassphrase,
 	})
 }
 
