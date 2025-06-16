@@ -37,7 +37,7 @@ func (f *FlipCam) startWebserver(ctx context.Context) {
 	http.Handle("/static/", http.StripPrefix("/static/", static))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		playlistUrlPath := origin + f.getPlayListUrlPath()
+		playlistUrlPath := f.getPlayListUrlPath()
 		err := Index(playlistUrlPath).Render(r.Context(), w)
 		if err != nil {
 			log.Printf("web: failed to render: %v\n", err)

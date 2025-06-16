@@ -16,7 +16,6 @@ const DefaultServiceNameCaddy = "flipcam-caddy.service"
 const DefaultServiceNameDnsmasq = "flipcam-dnsmasq.service"
 const DefaultServiceNameHostapd = "flipcam-hostapd.service"
 
-var origin = "https://flipcam.sd4u.be"
 var host = "flipcam.sd4u.be"
 
 type Opts struct {

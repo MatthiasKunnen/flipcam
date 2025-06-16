@@ -44,10 +44,21 @@ hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
 })
 
 const playListUrl = document.getElementById('playlist-url')
+function getPlayListUrl() {
+	let pathOrUrl = playListUrl.value
+	if (pathOrUrl.startsWith('/')) {
+		const url = new URL(document.location.href)
+		url.search = ''
+		url.pathname = pathOrUrl
+		return url
+	}
+
+	return new URL(pathOrUrl)
+}
 const playButton = document.getElementById('playback-start')
 playButton.addEventListener('click', () => {
 	playButton.style.display = 'none'
-	hls.loadSource(playListUrl.value)
+	hls.loadSource(getPlayListUrl().toString())
 	hls.attachMedia(video)
 	video.play()
 })
@@ -298,17 +309,8 @@ document.getElementById('restart-muxer').addEventListener('click', () => {
 				method: 'POST',
 			})
 			if (response.status === 200) {
-				const newPath = await response.text()
-				/** @var URL */
-				let currentUrl
-				try {
-					currentUrl = new URL(playListUrl.value)
-				} catch {
-					currentUrl = new URL(document.location.href)
-				}
-				currentUrl.pathname = newPath
-				playListUrl.value = currentUrl.toString()
-				hls.loadSource(playListUrl.value)
+				playListUrl.value = await response.text()
+				hls.loadSource(getPlayListUrl().toString())
 				if (isPlaying) {
 					video.play()
 				}
