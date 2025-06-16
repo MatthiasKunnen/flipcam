@@ -1,6 +1,7 @@
 package flipcamlib
 
 import (
+	"fmt"
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"io"
@@ -278,7 +279,17 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 		},
 	}
 
-	return json.MarshalWrite(w, config, jsontext.WithIndent("\t"))
+	err := json.MarshalWrite(w, config, jsontext.WithIndent("\t"))
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte("\n"))
+	if err != nil {
+		return fmt.Errorf("failed to append EOF newline: %w", err)
+	}
+
+	return nil
 }
 
 type OrderedObject[V any] []ObjectMember[V]
