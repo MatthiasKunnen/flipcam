@@ -48,6 +48,9 @@ Making HTTPS plug-and-play with valid certificates, while possible, would only b
 commercial product and require a server.
 Users should evaluate their preferred HTTPS approach and make changes accordingly.
 
+Note: self-signed certificates are currently not working on Firefox, see
+<https://github.com/caddyserver/caddy/issues/6891>.
+
 ### Wi-Fi
 `hostapd` is used to set up an access point on the selected wireless interface.
 Considerations have been made to make this as plug-and-play as possible but some limitations apply.
