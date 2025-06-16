@@ -31,6 +31,7 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 		},
 	}
 
+	routerIp := f.RouterIp().Addr().String()
 	flipcamRoutes := []OrderedObject[interface{}]{
 		{
 			// Allow CORS from local origins
@@ -199,7 +200,12 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 					{
 						"match", []OrderedObject[interface{}]{
 							{
-								{"host", []string{host}},
+								{
+									"host", []string{
+										host,
+										routerIp,
+									},
+								},
 							},
 						},
 					},
@@ -223,6 +229,23 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 		},
 	}
 
+	pki := OrderedObject[interface{}]{
+		{
+			"certificate_authorities", OrderedObject[interface{}]{
+				{
+					"local", OrderedObject[interface{}]{
+						// This prevents the installation of the internal CA's root cert
+						// in the trust store. It gives sudo errors when run under systemd
+						// when trying to install the root cert.
+						// It should be possible to enable this after generating the root
+						// cert by running "sudo caddy trust" though this might need ro
+						// reoccur when the cert expires so lets just disable it.
+						{"install_trust", false},
+					},
+				},
+			},
+		},
+	}
 	config := OrderedObject[interface{}]{
 		{
 			"admin", OrderedObject[interface{}]{
@@ -240,6 +263,7 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 						},
 					},
 				},
+				{"pki", pki},
 				{
 					"tls", OrderedObject[interface{}]{
 						{
@@ -268,6 +292,18 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 																},
 															},
 														},
+													},
+												},
+											},
+										},
+										{
+											{
+												"subjects", []string{routerIp},
+											},
+											{
+												"issuers", []OrderedObject[interface{}]{
+													{
+														{"module", "internal"},
 													},
 												},
 											},
