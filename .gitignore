@@ -8,6 +8,7 @@
 !/.gitignore
 !/LICENSE
 !/README.md
+!/TROUBLESHOOTING.md
 !/caddy.conf.js
 !/go.mod
 !/go.sum
