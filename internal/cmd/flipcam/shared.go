@@ -27,6 +27,15 @@ func addHlsUrlPathPrefixFlag(cmd *cobra.Command, stringVar *string) {
 	)
 }
 
+func addHostnameFlag(cmd *cobra.Command, stringVar *string) {
+	cmd.Flags().StringVar(
+		stringVar,
+		"hostname",
+		"",
+		"If specified, flipcam will be hosted on this domain.",
+	)
+}
+
 func addInterfaceFlag(cmd *cobra.Command, stringVar *string) {
 	flagName := "wireless-interface"
 	cmd.Flags().StringVar(

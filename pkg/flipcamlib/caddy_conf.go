@@ -9,7 +9,19 @@ import (
 
 var goProApi = "api.gopro.com"
 
-func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
+type CaddyConfOpts struct {
+	Hostname string
+}
+
+func (f *FlipCam) GenerateCaddyConfig(w io.Writer, opts CaddyConfOpts) error {
+	routerIp := f.RouterIp().Addr().String()
+	allHosts := []string{
+		routerIp,
+	}
+	if opts.Hostname != "" {
+		allHosts = append(allHosts, opts.Hostname)
+	}
+
 	goProRoutes := []OrderedObject[interface{}]{
 		{
 			{
@@ -31,7 +43,6 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 		},
 	}
 
-	routerIp := f.RouterIp().Addr().String()
 	flipcamRoutes := []OrderedObject[interface{}]{
 		{
 			// Allow CORS from local origins
@@ -201,10 +212,7 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 						"match", []OrderedObject[interface{}]{
 							{
 								{
-									"host", []string{
-										host,
-										routerIp,
-									},
+									"host", allHosts,
 								},
 							},
 						},
@@ -246,6 +254,49 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 			},
 		},
 	}
+	tlsAutomationPolicies := []OrderedObject[interface{}]{
+		{
+			{
+				"subjects", []string{routerIp},
+			},
+			{
+				"issuers", []OrderedObject[interface{}]{
+					{
+						{"module", "internal"},
+					},
+				},
+			},
+		},
+	}
+	if opts.Hostname != "" {
+		tlsAutomationPolicies = append(tlsAutomationPolicies, OrderedObject[interface{}]{
+			{
+				"subjects", []string{opts.Hostname},
+			},
+			{
+				"issuers", []OrderedObject[interface{}]{
+					{
+						{"module", "acme"},
+						{
+							"challenges", OrderedObject[interface{}]{
+								{
+									"dns", OrderedObject[interface{}]{
+										{
+											"provider", OrderedObject[interface{}]{
+												{"name", "manual_dns"},
+												{"wait_in_mins", "1"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+	}
+
 	config := OrderedObject[interface{}]{
 		{
 			"admin", OrderedObject[interface{}]{
@@ -269,46 +320,7 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 						{
 							"automation", OrderedObject[interface{}]{
 								{
-									"policies", []OrderedObject[interface{}]{
-										{
-											{
-												"subjects", []string{host},
-											},
-											{
-												"issuers", []OrderedObject[interface{}]{
-													{
-														{"module", "acme"},
-														{
-															"challenges", OrderedObject[interface{}]{
-																{
-																	"dns", OrderedObject[interface{}]{
-																		{
-																			"provider", OrderedObject[interface{}]{
-																				{"name", "manual_dns"},
-																				{"wait_in_mins", "1"},
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										{
-											{
-												"subjects", []string{routerIp},
-											},
-											{
-												"issuers", []OrderedObject[interface{}]{
-													{
-														{"module", "internal"},
-													},
-												},
-											},
-										},
-									},
+									"policies", tlsAutomationPolicies,
 								},
 							},
 						},

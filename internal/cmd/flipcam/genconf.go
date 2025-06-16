@@ -15,7 +15,9 @@ import (
 //go:embed install.sh
 var installScript string
 var installTmpl = template.Must(template.New("install.sh").Parse(installScript))
+
 var caddyBinaryPath string
+var hostname string
 
 var genConfCmd = &cobra.Command{
 	Use:     "genconf",
@@ -44,7 +46,9 @@ var genConfCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("failed to create caddy JSON file: %v", err)
 		}
-		err = flipcam.GenerateCaddyConfig(caddyF)
+		err = flipcam.GenerateCaddyConfig(caddyF, flipcamlib.CaddyConfOpts{
+			Hostname: hostname,
+		})
 		if err != nil {
 			log.Fatalf("failed to generate caddy config: %v", err)
 		}
@@ -75,7 +79,9 @@ var genConfCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("failed to create dnsmasq config file: %v", err)
 		}
-		err = flipcam.GenerateDnsmasqConf(dnsmasqF)
+		err = flipcam.GenerateDnsmasqConf(dnsmasqF, flipcamlib.DnsmasqConfOpts{
+			Hostname: hostname,
+		})
 		if err != nil {
 			log.Fatalf("failed to generate dnsmasq config: %v", err)
 		}
@@ -202,6 +208,7 @@ var genConfCmd = &cobra.Command{
 func init() {
 	addHlsOutputDirFlag(genConfCmd, &hlsOutputDir)
 	addHlsUrlPathPrefixFlag(genConfCmd, &hlsUrlPathPrefix)
+	addHostnameFlag(genConfCmd, &hostname)
 	addInterfaceFlag(genConfCmd, &wirelessInterface)
 	addIpv4Flag(genConfCmd, &routerIp)
 	addUiPortFlag(genConfCmd, &hlsUrlPathPrefix)

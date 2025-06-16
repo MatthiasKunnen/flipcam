@@ -30,7 +30,11 @@ interface-name={{.}},{{$.Interface}}/4
 log-debug
 `))
 
-func (f *FlipCam) GenerateDnsmasqConf(w io.Writer) error {
+type DnsmasqConfOpts struct {
+	Hostname string
+}
+
+func (f *FlipCam) GenerateDnsmasqConf(w io.Writer, opts DnsmasqConfOpts) error {
 	routerIp := f.RouterIp()
 	dhcpStart := routerIp.Addr().Next()
 
@@ -41,16 +45,17 @@ func (f *FlipCam) GenerateDnsmasqConf(w io.Writer) error {
 
 	dhcpEnd := make(net.IP, 4)
 	binary.BigEndian.PutUint32(dhcpEnd, broadcastAddress-1)
+	localHosts := []string{goProApi}
+	if opts.Hostname != "" {
+		localHosts = append(localHosts, opts.Hostname)
+	}
 
 	return dnsmasqConfT.Execute(w, dnsmasqConf{
-		DhcpStart: dhcpStart.String(),
-		DhcpEnd:   dhcpEnd.String(),
-		Interface: f.WirelessInterface(),
-		RouterIp:  routerIp.Addr().String(),
-		LocalHosts: []string{
-			goProApi,
-			host,
-		},
+		DhcpStart:  dhcpStart.String(),
+		DhcpEnd:    dhcpEnd.String(),
+		Interface:  f.WirelessInterface(),
+		RouterIp:   routerIp.Addr().String(),
+		LocalHosts: localHosts,
 	})
 }
 
