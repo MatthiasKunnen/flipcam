@@ -248,6 +248,9 @@ func (f *FlipCam) GenerateCaddyConfig(w io.Writer) error {
 									"policies", []OrderedObject[interface{}]{
 										{
 											{
+												"subjects", []string{host},
+											},
+											{
 												"issuers", []OrderedObject[interface{}]{
 													{
 														{"module", "acme"},
