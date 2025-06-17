@@ -34,7 +34,7 @@ install -m 644 "$source_dir/{{.DnsmasqServiceName}}" "/etc/systemd/system/{{.Dns
 install -m 600 "$source_dir/hostapd.conf" "{{.HostapdConfPath}}"
 install -m 644 "$source_dir/{{.HostapdServiceName}}" "/etc/systemd/system/{{.HostapdServiceName}}"
 
-install -m 640 "$source_dir/sudoers.conf" "/etc/sudoers.d/50_flipcam"
+install -m 440 "$source_dir/sudoers.conf" "/etc/sudoers.d/50_flipcam"
 install -m 640 -g polkitd "$source_dir/{{.PolkitFilename}}" "/etc/polkit-1/rules.d/50_flipcam.rules"
 
 systemctl daemon-reload
