@@ -2,19 +2,12 @@ package flipcam
 
 import (
 	_ "embed"
-	"errors"
 	"github.com/MatthiasKunnen/flipcam/pkg/flipcamlib"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"path"
-	"strings"
-	"text/template"
 )
-
-//go:embed install.sh
-var installScript string
-var installTmpl = template.Must(template.New("install.sh").Parse(installScript))
 
 var caddyBinaryPath string
 var hostname string
@@ -22,7 +15,8 @@ var wpaPassphrase wpaPassphraseFlag
 
 var genConfCmd = &cobra.Command{
 	Use:     "genconf",
-	Short:   "Generates the configuration files for flipcam",
+	Short:   "Generates configuration files for flipcam",
+	Long:    `Generates ansible/generated_vars.yaml and ansible/files/caddy.json`,
 	Example: `flipcam genconf --hls-output-dir /tmp/hls`,
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,16 +28,10 @@ var genConfCmd = &cobra.Command{
 			WirelessInterface: wirelessInterface,
 		})
 
-		outDir := "conf_out"
-		err := os.Mkdir(outDir, 0755)
-		switch {
-		case errors.Is(err, os.ErrExist):
-		case err != nil:
-			log.Fatalf("failed to create %s directory: %v", outDir, err)
-		}
+		outDir := "ansible"
 
 		caddyFilename := "caddy.json"
-		caddyF, err := os.Create(path.Join(outDir, caddyFilename))
+		caddyF, err := os.Create(path.Join(outDir, "templates", caddyFilename))
 		if err != nil {
 			log.Fatalf("failed to create caddy JSON file: %v", err)
 		}
@@ -58,152 +46,37 @@ var genConfCmd = &cobra.Command{
 			log.Fatalf("failed to close caddy config file: %v", err)
 		}
 
-		caddyServiceF, err := os.Create(path.Join(outDir, flipcam.ServiceNameCaddy()))
-		if err != nil {
-			log.Fatalf("failed to create %s: %v", flipcam.ServiceNameCaddy(), err)
-		}
-		err = flipcam.GenerateCaddyServiceUnit(caddyServiceF, flipcamlib.CaddyServiceUnitOptions{
-			BinaryPath: caddyBinaryPath,
-			ConfigPath: "/etc/flipcam/caddy.json",
-			PrivateTmp: !strings.HasPrefix(hlsOutputDir, os.TempDir()+"/"),
-		})
-		if err != nil {
-			log.Fatalf("failed to generate %s: %v", flipcam.ServiceNameCaddy(), err)
-		}
-		err = caddyServiceF.Close()
-		if err != nil {
-			log.Fatalf("failed to close %s: %v", flipcam.ServiceNameCaddy(), err)
-		}
-
-		dnsmasqFilename := "dnsmasq.conf"
-		dnsmasqF, err := os.Create(path.Join(outDir, dnsmasqFilename))
-		if err != nil {
-			log.Fatalf("failed to create dnsmasq config file: %v", err)
-		}
-		err = flipcam.GenerateDnsmasqConf(dnsmasqF, flipcamlib.DnsmasqConfOpts{
-			Hostname: hostname,
-		})
-		if err != nil {
-			log.Fatalf("failed to generate dnsmasq config: %v", err)
-		}
-		err = dnsmasqF.Close()
-		if err != nil {
-			log.Fatalf("failed to close dnsmasq config file: %v", err)
-		}
-
-		dnsmasqServiceF, err := os.Create(path.Join(outDir, flipcam.ServiceNameDnsmasq()))
-		if err != nil {
-			log.Fatalf("failed to create dnsmasq service: %v", err)
-		}
-		err = flipcam.GenerateDnsmasqService(dnsmasqServiceF, flipcamlib.DnsmasqServiceOpts{
-			ConfFilePath: flipcamlib.DnsmasqConfPath,
-		})
-		if err != nil {
-			log.Fatalf("failed to generate dnsmasq service: %v", err)
-		}
-		err = dnsmasqServiceF.Close()
-		if err != nil {
-			log.Fatalf("failed to close dnsmasq service file: %v", err)
-		}
-
-		hostapdFilename := "hostapd.conf"
-		hostapdF, err := os.Create(path.Join(outDir, hostapdFilename))
-		if err != nil {
-			log.Fatalf("failed to create hostapd config file: %v", err)
-		}
-		err = flipcam.GenerateHostapdConf(hostapdF, flipcamlib.HostapdConfOpts{
-			WpaPassphrase: wpaPassphrase.String(),
-		})
-		if err != nil {
-			log.Fatalf("failed to generate hostapd config: %v", err)
-		}
-		err = hostapdF.Close()
-		if err != nil {
-			log.Fatalf("failed to close hostapd config file: %v", err)
-		}
-
-		hostapdServiceF, err := os.Create(path.Join(outDir, flipcam.ServiceNameHostapd()))
-		if err != nil {
-			log.Fatalf("failed to create hostapd service: %v", err)
-		}
-		err = flipcam.GenerateHostapdService(hostapdServiceF, flipcamlib.HostapdServiceOpts{
-			ConfFilePath: flipcamlib.HostapdConfPath,
-		})
-		if err != nil {
-			log.Fatalf("failed to generate hostapd service: %v", err)
-		}
-		err = hostapdServiceF.Close()
-		if err != nil {
-			log.Fatalf("failed to close hostapd service file: %v", err)
-		}
-
-		polkitFilename := "polkit.js"
-		polkitF, err := os.Create(path.Join(outDir, polkitFilename))
-		if err != nil {
-			log.Fatalf("failed to create polkit.js: %v", err)
-		}
-		err = flipcam.GeneratePolkitRule(polkitF)
-		if err != nil {
-			log.Fatalf("failed to generate polkit.js: %v", err)
-		}
-		err = polkitF.Close()
-		if err != nil {
-			log.Fatalf("failed to close polkit.js file: %v", err)
-		}
-
-		sudoersFilename := "sudoers.conf"
-		sudoersF, err := os.Create(path.Join(outDir, sudoersFilename))
-		if err != nil {
-			log.Fatalf("failed to create sudoers config file: %v", err)
-		}
-		err = flipcam.GenerateSudoersConf(sudoersF)
-		if err != nil {
-			log.Fatalf("failed to generate sudoers config: %v", err)
-		}
-		err = sudoersF.Close()
-		if err != nil {
-			log.Fatalf("failed to close sudoers config file: %v", err)
-		}
-
-		err = rootCmd.GenBashCompletionFileV2(path.Join(outDir, "completion_bash"), true)
+		err = rootCmd.GenBashCompletionFileV2(path.Join(outDir, "files/completion_bash"), true)
 		if err != nil {
 			log.Fatalf("failed to generate bash completion file: %v", err)
 		}
 
-		err = rootCmd.GenFishCompletionFile(path.Join(outDir, "completion_fish"), true)
+		err = rootCmd.GenFishCompletionFile(path.Join(outDir, "files/completion_fish"), true)
 		if err != nil {
 			log.Fatalf("failed to generate fish completion file: %v", err)
 		}
 
-		err = rootCmd.GenZshCompletionFile(path.Join(outDir, "completion_zsh"))
+		err = rootCmd.GenZshCompletionFile(path.Join(outDir, "files/completion_zsh"))
 		if err != nil {
 			log.Fatalf("failed to generate zsh completion file: %v", err)
 		}
 
-		installF, err := os.OpenFile(
-			path.Join(outDir, "install.sh"),
-			os.O_RDWR|os.O_CREATE|os.O_TRUNC,
-			0777,
-		)
+		generatedVarsFilename := "generated_vars.yaml"
+		generatedVarsF, err := os.Create(path.Join(outDir, generatedVarsFilename))
 		if err != nil {
-			log.Fatalf("failed to open install.sh: %v", err)
+			log.Fatalf("failed to open %s: %v", generatedVarsFilename, err)
 		}
-		err = installTmpl.Execute(installF, map[string]interface{}{
-			"CaddyConfPath":      flipcamlib.CaddyConfPath,
-			"CaddyServiceName":   flipcam.ServiceNameCaddy(),
-			"DnsmasqConfPath":    flipcamlib.DnsmasqConfPath,
-			"DnsmasqServiceName": flipcam.ServiceNameDnsmasq(),
-			"HlsOutputDir":       hlsOutputDir,
-			"HostapdConfPath":    flipcamlib.HostapdConfPath,
-			"HostapdServiceName": flipcam.ServiceNameHostapd(),
-			"PolkitFilename":     polkitFilename,
+		err = flipcam.GenerateVars(generatedVarsF, flipcamlib.GenerateVarsOpts{
+			Hostname:           hostname,
+			CaddyBinaryPath:    caddyBinaryPath,
+			WirelessPassphrase: wpaPassphrase.String(),
 		})
 		if err != nil {
-			log.Fatalf("failed to generate install script: %v", err)
+			log.Fatalf("failed to generate vars: %v", err)
 		}
-		err = installF.Close()
+		err = generatedVarsF.Close()
 		if err != nil {
-			log.Fatalf("failed to close install script file: %v", err)
+			log.Fatalf("failed to close %s file: %v", generatedVarsFilename, err)
 		}
 	},
 }

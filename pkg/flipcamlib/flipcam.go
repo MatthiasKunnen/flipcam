@@ -8,13 +8,9 @@ import (
 	"sync"
 )
 
-var CaddyConfPath = "/etc/flipcam/caddy.json"
-var DnsmasqConfPath = "/etc/flipcam/dnsmasq.conf"
-var HostapdConfPath = "/etc/flipcam/hostapd.conf"
-
-const DefaultServiceNameCaddy = "flipcam-caddy.service"
-const DefaultServiceNameDnsmasq = "flipcam-dnsmasq.service"
-const DefaultServiceNameHostapd = "flipcam-hostapd.service"
+const defaultServiceNameCaddy = "flipcam-caddy.service"
+const defaultServiceNameDnsmasq = "flipcam-dnsmasq.service"
+const defaultServiceNameHostapd = "flipcam-hostapd.service"
 
 type Opts struct {
 	HlsOutputDir     string
@@ -69,9 +65,9 @@ type FlipCam struct {
 }
 
 func New(opts Opts) *FlipCam {
-	opts.ServiceNameCaddy = defaultString(opts.ServiceNameCaddy, DefaultServiceNameCaddy)
-	opts.ServiceNameDnsmasq = defaultString(opts.ServiceNameDnsmasq, DefaultServiceNameDnsmasq)
-	opts.ServiceNameHostapd = defaultString(opts.ServiceNameHostapd, DefaultServiceNameHostapd)
+	opts.ServiceNameCaddy = defaultString(opts.ServiceNameCaddy, defaultServiceNameCaddy)
+	opts.ServiceNameDnsmasq = defaultString(opts.ServiceNameDnsmasq, defaultServiceNameDnsmasq)
+	opts.ServiceNameHostapd = defaultString(opts.ServiceNameHostapd, defaultServiceNameHostapd)
 
 	f := &FlipCam{
 		hlsOutputDir:     opts.HlsOutputDir,

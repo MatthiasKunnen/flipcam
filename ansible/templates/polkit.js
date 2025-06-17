@@ -1,5 +1,5 @@
 polkit.addRule(function(action, subject) {
-	if (!subject.isInGroup("flipcam")) {
+	if (!subject.isInGroup("{{ flipcam_group }}")) {
 		return polkit.Result.NOT_HANDLED;
 	}
 
@@ -8,9 +8,9 @@ polkit.addRule(function(action, subject) {
 	}
 
 	var unit = action.lookup("unit")
-	if (unit !== "{{.CaddyServiceName}}"
-		&& unit !== "{{.DnsmasqServiceName}}"
-		&& unit !== "{{.HostapdServiceName}}") {
+	if (unit !== "{{ caddy_service_name }}"
+		&& unit !== "{{ dnsmasq_service_name }}"
+		&& unit !== "{{ hostapd_service_name }}") {
 		return polkit.Result.NOT_HANDLED;
 	}
 

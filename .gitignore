@@ -1,4 +1,8 @@
 /*
+!/ansible/
+/ansible/templates/caddy.json
+/ansible/files/completion_*
+/ansible/generated_vars.yaml
 !/cmd/
 !/internal/
 !/pkg/

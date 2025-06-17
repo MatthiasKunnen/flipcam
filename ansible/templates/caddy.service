@@ -12,9 +12,9 @@ User=caddy
 Group=caddy
 Environment=XDG_DATA_HOME=/var/lib
 Environment=XDG_CONFIG_HOME=/etc
-ExecStartPre={{.BinaryPath}} validate --config {{.ConfigPath}}
-ExecStart={{.BinaryPath}} run --environ --config {{.ConfigPath}}
-ExecReload={{.BinaryPath}} reload --config {{.ConfigPath}} --force
+ExecStartPre={{ caddy_binary_path }} validate --config {{ caddy_conf_file_path }}
+ExecStart={{ caddy_binary_path }} run --environ --config {{ caddy_conf_file_path }}
+ExecReload={{ caddy_binary_path }} reload --config {{ caddy_conf_file_path }} --force
 ExecStopPost=/usr/bin/rm -f /run/caddy/admin.socket
 
 # Do not allow the process to be restarted in a tight loop. If the
@@ -36,12 +36,12 @@ MemoryAccounting=true
 MemoryDenyWriteExecute=true
 NoNewPrivileges=true
 PrivateDevices=true
-{{- if .PrivateTmp}}
-PrivateTmp=true
-{{- else}}
+{% if hls_output_dir.startswith('/tmp/') %}
 # HLS output in /tmp, cannot use private /tmp
 PrivateTmp=false
-{{- end}}
+{% else %}
+PrivateTmp=true
+{% endif %}
 ProcSubset=pid
 ProtectClock=true
 ProtectControlGroups=true
@@ -53,7 +53,7 @@ ProtectKernelTunables=true
 ProtectProc=invisible
 ProtectSystem=strict
 RemoveIPC=true
-ReadWritePaths=/var/lib/caddy /var/log/caddy /run/caddy
+ReadWritePaths={{ caddy_home }} /var/log/caddy /run/caddy
 RestrictNamespaces=true
 RestrictRealtime=true
 RestrictSUIDSGID=true

@@ -1,0 +1,217 @@
+---
+- name: Configure device
+  hosts: all
+  become: true
+  become_user: root
+  vars:
+    config_filepath: /etc/flipcam
+    caddy_conf_file_path: "{{config_filepath}}/caddy.json"
+    caddy_group: caddy
+    caddy_home: /var/lib/caddy
+    caddy_user: caddy
+    dnsmasq_conf_file_path: "{{config_filepath}}/dnsmasq.conf"
+    flipcam_group: flipcam
+    hostapd_conf_file_path: "{{config_filepath}}/hostapd.conf"
+  vars_files:
+    - generated_vars.yaml
+  tasks:
+    - name: Check if all variables are set
+      ansible.builtin.fail:
+        msg: Variable "{{ item }}" is not defined
+      when: item not in vars
+      with_items:
+        - caddy_binary_path
+        - caddy_conf_file_path
+        - caddy_group
+        - caddy_home
+        - caddy_service_name
+        - caddy_user
+        - config_filepath
+        - dnsmasq_conf_file_path
+        - dnsmasq_service_name
+        - flipcam_group
+        - flipcam_sudo_commands
+        - hls_output_dir
+        - hostapd_conf_file_path
+        - hostapd_service_name
+        - local_hosts
+        - router_ip
+        - wireless_interface
+        - wireless_passphrase
+    - name: Install dependencies
+      community.general.pacman:
+        name:
+          - 'dnsmasq'
+          - 'ffmpeg'
+          - 'hostapd'
+          - 'polkit'
+          - 'sudo'
+        state:
+          present
+    - name: Ensure the 'flipcam' system group exists
+      ansible.builtin.group:
+        name: "{{ flipcam_group }}"
+        system: true
+        state: present
+
+    - name: Ensure the 'caddy' system group exists
+      ansible.builtin.group:
+        name: "{{ caddy_group }}"
+        system: true
+        state: present
+    - name: Ensure the 'caddy' system user exists
+      ansible.builtin.user:
+        name: "{{ caddy_user }}"
+        group: "{{ caddy_group }}"
+        home: "{{ caddy_home }}"
+        shell: /usr/sbin/nologin
+        comment: "Caddy web server"
+        system: true
+        create_home: true
+        state: present
+    - name: Ensure Caddy home directory has correct ownership and permissions
+      ansible.builtin.file:
+        path: "{{ caddy_home }}"
+        owner: "{{ caddy_user }}"
+        group: "{{ caddy_group }}"
+        mode: '0700'
+        state: directory
+    - name: Install Caddy and Flipcam binaries
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - src: '../caddy'
+          dest: '{{ caddy_binary_path }}'
+        - src: '../flipcam'
+          dest: '/usr/local/bin/flipcam'
+
+    - name: Create /srv dir
+      ansible.builtin.file:
+        path: /srv/flipcam
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Copy static assets for Flipcam
+      ansible.builtin.copy:
+        src: "../static/"
+        dest: /srv/flipcam/static
+        directory_mode: '0755'
+        mode: '0644'
+
+    - name: Create HLS output directory
+      ansible.builtin.file:
+        path: "{{ hls_output_dir }}"
+        state: directory
+        owner: root
+        group: "{{ flipcam_group }}"
+        mode: '2770'
+
+    - name: Set ACLs for the HLS output directory
+      ansible.posix.acl:
+        path: "{{ hls_output_dir }}"
+        entity: "{{ item.entity }}"
+        etype: "{{ item.etype }}"
+        permissions: "{{ item.permissions }}"
+        state: present
+      loop:
+        - { entity: caddy, etype: group, permissions: 'rx' }
+        - { entity: caddy, etype: group, permissions: 'rx', default: true }
+
+    - name: Update systemd service files
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+        owner: root
+        group: root
+      notify: Reload systemd
+      loop:
+        - src: 'caddy.service'
+          dest: '/etc/systemd/system/{{ caddy_service_name }}'
+          mode: '0644'
+        - src: 'dnsmasq.service'
+          dest: '/etc/systemd/system/{{ dnsmasq_service_name }}'
+          mode: '0644'
+        - src: 'hostapd.service'
+          dest: '/etc/systemd/system/{{ hostapd_service_name }}'
+          mode: '0644'
+
+    - name: Allow flipcam group to manage certain things without password
+      ansible.builtin.template:
+        src: sudoers.conf
+        dest: '/etc/sudoers.d/50_flipcam'
+        mode: '0440'
+        owner: root
+        group: root
+      register: create_sudoers_file
+    - name: Validate sudoers file
+      block:
+        - name: Validate sudo
+          ansible.builtin.command:
+            cmd: visudo --check --perms --owner '/etc/sudoers.d/50_flipcam'
+          register: sudoers_validation
+          changed_when: false
+      rescue:
+        - name: Print sudo validation failure
+          ansible.builtin.debug:
+            var: sudoers_validation.stdout
+        - name: Remove sudoers file that did not pass validation
+          ansible.builtin.file:
+            path: /etc/sudoers.d/50_flipcam
+            state: absent
+          failed_when: true
+
+    - name: Create flipcam config directory
+      ansible.builtin.file:
+        path: '{{ config_filepath }}'
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Update config files
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner | default('root') }}"
+        group: "{{ item.group | default('root') }}"
+      loop:
+        - src: 'caddy.json'
+          dest: '{{ caddy_conf_file_path }}'
+          mode: '0644'
+        - src: 'dnsmasq.conf'
+          dest: '{{ dnsmasq_conf_file_path }}'
+          mode: '0644'
+        - src: 'hostapd.conf'
+          dest: '{{ hostapd_conf_file_path }}'
+          mode: '0600'
+        - src: 'polkit.js'
+          dest: '/etc/polkit-1/rules.d/50_flipcam.rules'
+          mode: '0640'
+          group: polkitd
+
+    - name: Install shell completions
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: '0644'
+        owner: root
+        group: root
+      loop:
+        - src: 'completion_bash'
+          dest: '/usr/local/share/bash-completion/completions/flipcam'
+        - src: 'completion_fish'
+          dest: '/usr/local/share/fish/vendor_completions.d/flipcam.fish'
+        - src: 'completion_zsh'
+          dest: '/usr/local/share/zsh/site-functions/_flipcam'
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true

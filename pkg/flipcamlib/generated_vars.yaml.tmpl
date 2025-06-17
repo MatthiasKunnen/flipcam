@@ -1,0 +1,26 @@
+# Generated using flipcam genconf
+# If manual changes are made, make sure that other generated files are also changed.
+caddy_binary_path: {{.CaddyBinaryPath}}
+caddy_service_name: {{.CaddyServiceName}}
+
+dnsmasq_service_name: {{.DnsmasqServiceName}}
+
+router_ip: {{.RouterIp}}
+dhcp_start: {{.DhcpStart}}
+dhcp_end: {{.DhcpEnd}}
+local_hosts:
+{{- range .LocalHosts}}
+  - {{.}}
+{{- end}}
+
+hls_output_dir: {{.HlsOutputDir}}
+
+hostapd_service_name: {{.HostapdServiceName}}
+
+flipcam_sudo_commands:
+{{- range .FlipcamSudoCommands}}
+  - {{.}}
+{{- end}}
+
+wireless_interface: {{.WirelessInterface}}
+wireless_passphrase: {{.WirelessPassphrase}}

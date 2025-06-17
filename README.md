@@ -84,10 +84,9 @@ as unmanaged and undo this change when it closes.
         --caddy-binary-path /usr/local/bin/caddy \
         --hostname flipcam.optional.com
     ```
-   This generates the `conf_out` dir which contains the generated installation script and config
-   files.
+   This generates `ansible/generated_vars.yaml` and `ansible/templates/caddy.json`.
    Read, validate, and customize these files if necessary.
-1. `sudo ./conf_out/install.sh`
+1. Run the Ansible playbook, see [ansible/README.md](./ansible/README.md).
 1. Add the user that should run flipcam to the flipcam user group. `usermod -aG flipcam username`.
    Relogging is most likely required.
 

@@ -8,8 +8,8 @@ Conflicts=dnsmasq.service
 
 [Service]
 Type=exec
-ExecStartPre=/usr/bin/dnsmasq --test --conf-file={{.ConfFilePath}}
-ExecStart=/usr/bin/dnsmasq -k --user=dnsmasq --conf-file={{.ConfFilePath}} --pid-file
+ExecStartPre=/usr/bin/dnsmasq --test --conf-file={{ dnsmasq_conf_file_path }}
+ExecStart=/usr/bin/dnsmasq -k --user=dnsmasq --conf-file={{ dnsmasq_conf_file_path }} --pid-file
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 PrivateDevices=true
