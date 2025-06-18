@@ -5,15 +5,17 @@ Make sure you have done the following before running the script:
 
 ## On local machine
 ```shell
-ansible-playbook playbook.yaml \
+ansible-playbook playbook.yaml --diff \
     -i inventory.yaml \
+    --ask-become-pass \
     -l localhost
 ```
 
 ## On remote machine
 ```shell
-ansible-playbook playbook.yaml \
+ansible-playbook playbook.yaml --diff \
     -i inventory.yaml \
+    --ask-become-pass \
     -e 'ansible_host=ip_here' \
     -e 'ansible_ssh_user=ssh_username' \
     -l remote
