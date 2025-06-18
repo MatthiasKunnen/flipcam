@@ -200,6 +200,18 @@
           mode: '0640'
           group: polkitd
 
+    - name: Create shell completions directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - '/usr/local/share/bash-completion/completions'
+        - '/usr/local/share/fish/vendor_completions.d'
+        - '/usr/local/share/zsh/site-functions'
+
     - name: Install shell completions
       ansible.builtin.copy:
         src: "{{ item.src }}"
