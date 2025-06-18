@@ -75,7 +75,6 @@ as unmanaged and undo this change when it closes.
 
 ## Quick start
 ### Setup
-1. `go build -C ./cmd/caddy`. This builds a custom version of Caddy, you might not need this.
 1. `go build .` Builds the flipcam binary.
 1.  ```
     ./flipcam genconf \

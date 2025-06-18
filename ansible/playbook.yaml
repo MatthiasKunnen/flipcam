@@ -1,7 +1,14 @@
 ---
-# Make sure you have done the following before running the script:
-# - built caddy using go build -C ./cmd/caddy -o ../../caddy
-# - built flipcam using go build .
+- name: Build binaries
+  hosts: all
+  run_once: true
+  tasks:
+    - name: Build flipcam
+      ansible.builtin.command: go build -C ..
+      delegate_to: localhost
+    - name: Build caddy
+      ansible.builtin.command: go build -C ../cmd/caddy -o ../../caddy
+      delegate_to: localhost
 - name: Configure device
   hosts: all
   become: true
