@@ -12,14 +12,15 @@ import (
 type generatedVarsData struct {
 	CaddyBinaryPath     string
 	CaddyServiceName    string
+	ConnectivityHosts   []string
 	DhcpEnd             string
 	DhcpStart           string
 	DnsmasqServiceName  string
 	FlipcamSudoCommands []string
 	HlsOutputDir        string
 	HostapdServiceName  string
-	LocalHosts          []string
 	RouterIp            string
+	WebDomain           string
 	WirelessInterface   string
 	WirelessPassphrase  string
 }
@@ -47,14 +48,10 @@ func (f *FlipCam) GenerateVars(w io.Writer, opts GenerateVarsOpts) error {
 	dhcpEnd := make(net.IP, 4)
 	binary.BigEndian.PutUint32(dhcpEnd, broadcastAddress-1)
 
-	localHosts := []string{goProApi}
-	if opts.Hostname != "" {
-		localHosts = append(localHosts, opts.Hostname)
-	}
-
 	return generatedVarsTmpl.Execute(w, generatedVarsData{
 		CaddyBinaryPath:    opts.CaddyBinaryPath,
 		CaddyServiceName:   f.serviceNameCaddy,
+		ConnectivityHosts:  []string{goProApi},
 		DhcpEnd:            dhcpEnd.String(),
 		DhcpStart:          dhcpStart.String(),
 		DnsmasqServiceName: f.serviceNameDnsmasq,
@@ -66,8 +63,8 @@ func (f *FlipCam) GenerateVars(w io.Writer, opts GenerateVarsOpts) error {
 		},
 		HlsOutputDir:       f.hlsOutputDir,
 		HostapdServiceName: f.serviceNameHostapd,
-		LocalHosts:         localHosts,
 		RouterIp:           routerIp.Addr().String(),
+		WebDomain:          opts.Hostname,
 		WirelessInterface:  f.wirelessInterface,
 		WirelessPassphrase: opts.WirelessPassphrase,
 	})

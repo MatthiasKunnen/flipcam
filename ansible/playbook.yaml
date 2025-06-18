@@ -30,6 +30,7 @@
         - caddy_service_name
         - caddy_user
         - config_filepath
+        - connectivity_hosts
         - dnsmasq_conf_file_path
         - dnsmasq_service_name
         - flipcam_group
@@ -37,7 +38,6 @@
         - hls_output_dir
         - hostapd_conf_file_path
         - hostapd_service_name
-        - local_hosts
         - router_ip
         - wireless_interface
         - wireless_passphrase
@@ -199,6 +199,13 @@
           dest: '/etc/polkit-1/rules.d/50_flipcam.rules'
           mode: '0640'
           group: polkitd
+
+    - name: Add local hosts to /etc/hosts
+      ansible.builtin.blockinfile:
+        path: /etc/hosts
+        block: '{{ router_ip }} {{ web_domain }}'
+        marker: "# {mark} FlipCam managed block"
+        prepend_newline: true
 
     - name: Create shell completions directories
       ansible.builtin.file:

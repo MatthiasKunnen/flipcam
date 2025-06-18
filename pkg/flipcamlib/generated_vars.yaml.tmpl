@@ -8,10 +8,19 @@ dnsmasq_service_name: {{.DnsmasqServiceName}}
 router_ip: {{.RouterIp}}
 dhcp_start: {{.DhcpStart}}
 dhcp_end: {{.DhcpEnd}}
-local_hosts:
-{{- range .LocalHosts}}
+
+# Connectivity hosts resolve to the ip of the flipcam machine but not on the machine itself.
+# They are used for things like the GoPro's internet connectivity check.
+connectivity_hosts:
+{{- range .ConnectivityHosts}}
   - {{.}}
 {{- end}}
+
+{{ if .WebDomain }}
+# This domain will be configured to resolve to the IP of the flipcam machine using /etc/hosts
+# and the DNS.
+web_domain: {{.WebDomain}}
+{{ end }}
 
 hls_output_dir: {{.HlsOutputDir}}
 
