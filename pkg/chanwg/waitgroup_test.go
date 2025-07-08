@@ -71,7 +71,7 @@ func TestWaitGroupConcurrentDone(t *testing.T) {
 	t.Parallel()
 	var wg chanwg.WaitGroup
 	count := 100
-	wg.Add(int32(count))
+	wg.Add(count)
 
 	var doneCount int32
 	var mu sync.Mutex
