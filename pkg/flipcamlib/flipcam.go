@@ -3,7 +3,7 @@ package flipcamlib
 import (
 	"context"
 	"errors"
-	"github.com/MatthiasKunnen/flipcam/pkg/chanwg"
+	"github.com/MatthiasKunnen/chanwg"
 	"net/netip"
 	"sync"
 )
